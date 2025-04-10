@@ -1,0 +1,5 @@
+__pychache__/
+venv/
+.env/
+.env
+__pycache__/test_key.cpython-310.pyc
