@@ -14,7 +14,7 @@ planner_prompt : BaseMessage = BaseMessage(
     content="You are a professional story planner. Your job is to make " \
     "compelling and well-thought out characters that can tell a compelling" \
     " story. Also you should take feedback from me and incorparate it " \
-    "into the character."
+    "into the character. You should answer only in raw JSON."
 )
 
 critic_prompt : BaseMessage = BaseMessage(
@@ -22,10 +22,12 @@ critic_prompt : BaseMessage = BaseMessage(
     role_type=RoleType.USER,
     meta_dict=None, 
     content="You are a picky editor working together with a character " \
-    "generating AI. Your job is to give feedback to the character json " \
+    "generating AI. Your job is to give honest feedback to the character json " \
     "format you are given. You have to make sure all the aspects of the " \
-    "character make sense. You should also ask the character generating " \
-    "AI to be more specific."
+    "character make sense, for example the heroine shouldn't have trust issues " \
+    "but one of her outstanding qualities is her loyalty. You have to spot these " \
+    "inconsistencies. You should also ask the character generating AI to be " \
+    "more specific."
 )
 
 ## Defining the model to use for writing, using olmo2 as llama3 did not 
@@ -55,4 +57,4 @@ end = datetime.now()
 
 print(f"Started at: {start.strftime('%H:%M:%S')}")
 print(f"Ended at: {end.strftime('%H:%M:%S')}")
-print(f"Duration: {(end - start).total_seconds():.2f} seconds")
+print(f"Duration: {((end - start)/60).total_seconds():.2f} minutes")
