@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 from typing import List
-from camel.models import ModelFactory
-from camel.types import ModelPlatformType
 from camel.agents import ChatAgent
 from camel.responses import ChatAgentResponse
-from camel.messages import BaseMessage
-from camel.types import RoleType
 
+import os
+import json
+from datetime import datetime
+import re
 
 
 class CharacterFormat(BaseModel):
@@ -47,79 +47,89 @@ class StoryGlossary(BaseModel):
     theme: str
 
 
-# Prompt for the Planner since System Message isn't enough
-planner_prompt : BaseMessage = BaseMessage(
-    role_name="story planner",
-    role_type=RoleType.ASSISTANT,
-    meta_dict=None, #dict["sacred_flaw": "important"],
-    content="You are a professional story planner. Your job is to make " \
-    "compelling and well-thought out characters that can tell a compelling" \
-    " story. Also you should take feedback from me and incorparate it " \
-    "into the character."
-)
+## Opens a new json file named with a timestamp of creation and saves the first json into it
+# potentially needs a pathfile in provided variables
+def create_brainstorm_json():
+    now = datetime.now()
+    timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"brainstorming_{timestamp}.json"
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump({}, f, indent=4)
+    print(f"{filename} has been set up.")
+    return filename
 
-critic_prompt : BaseMessage = BaseMessage(
-    role_name="picky editor", 
-    role_type=RoleType.USER,
-    meta_dict=None, 
-    content="You are a picky editor working together with a character " \
-    "generating AI. Your job is to give feedback to the character json " \
-    "format you are given. You have to make sure all the aspects of the " \
-    "character make sense. You should also ask the character generating " \
-    "AI to be more specific."
-)
 
-## Defining the model to use for writing, using olmo2 as llama3 did not 
-# write that well
-model = ModelFactory.create(
-    model_platform=ModelPlatformType.OLLAMA,
-    model_type="olmo2", 
-    model_config_dict={"temperature": 0.6},
-)
+## Deletes a file with the provided name if it exists
+# potentially needs to delete a file at a specific path
+def delete_brainstorm_json(filename:str):
+    if os.path.exists(filename):
+        os.remove(filename)
+        print(f"{filename} has been deleted.")
+    else: 
+        print(f"{filename} does not exist.")
 
-## Create the planner AI agent with a designated system message 
-planner = ChatAgent(
-    system_message=planner_prompt, 
-    model=model,
-    token_limit=10000,
-)
 
-critic = ChatAgent(
-    system_message=critic_prompt, 
-    model=model, 
-    token_limit=10000,
-)
+## Using regex to get pure json from answer of planner model
+def extract_json_from_response(text: str): 
+    match = re.search(r"```(?:json)?s*(\{.*?})\s*```", text, re.DOTALL)
+    if match: 
+        json_str = match.group(1)
+    else: 
+        json_str = text
+    return json.loads(json_str)
 
-initial_message= "Make a compelling character."
 
 ## Setting up the cycle in which the planner and critic build a character
-def makeCharacter(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2):
+def makeCharacter(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> str:
+    character_data: str 
     input_msg = planner.step(initial_message, response_format=
                              CharacterFormat)
-    print(f"Response of character planner: {input_msg.msg.content}.\n")
+    # Checking if answer is raw json. If not, converting it to raw json
+    character_data = extract_json_from_response(input_msg.msg.content)
+    print(f"Response of character planner: {character_data}.\n")
 
     # looping through to iterate the character and make general 
     # statements more specific with the critic's feedback
     for _ in range(round_limit):
-        critic_response : ChatAgentResponse = critic.step(input_msg.msg.
-                                                          content),
+        critic_response : ChatAgentResponse = critic.step(character_data),
         # Getting the first object in the tuple of critic_response 
         # (because it is a tuple of ChatAgentReponse and info)
         critic_msg = critic_response[0]
         print(f"Response of critic: {critic_msg.msgs[0].content}.\n")
-
-        planner_response = planner.step(critic_msg.msg, 
-                                        response_format=CharacterFormat)
-        print(f"Response of character planner: {planner_response.msg.content}.\n")
 
         # Checking if the taks is finished as the critic is advised to 
         # write CAMEL_TASK_DONE when the task is done
         if 'CAMEL_TASK_DONE' in critic_msg.msgs[0].content:
             break
 
-        # Giving the planner_response into the loop
-        input_msg = planner_response.msg
-    print(f"The finished character json: {input_msg}")
+        planner_response = planner.step(critic_msg.msg, 
+                                        response_format=CharacterFormat)
+        # Making sure only plain json gets passed along
+        character_data = extract_json_from_response(planner_response.msg.content)
+        print(f"Response of character planner: {character_data}.\n")
+
+        # # Giving the planner_response into the loop
+        # input_msg = planner_response
+    print(f"The finished character json: {character_data}")
+    return character_data
+
+#makeCharacter(planner, critic, initial_message="Make a compelling protagonist")
+
+
+## Brainstorms the important facts for a story and adds them to a json
+#  glossary that functions as memory storage
+def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, character_count: int): 
+    memory_file_name = create_brainstorm_json()
+    characters = []
+    # creates character_count characters to use in the story
+    for _ in range(character_count):
+        character_prompt = f"make a {character_count}. character for a {genre} story."
+        print(character_prompt)
+        character = makeCharacter(planner, critic, initial_message=character_prompt)
+        characters.append(character)
+    # Opens the memory file to write into 
+    with open(memory_file_name, "w", encoding="utf-8") as memory: 
+        json.dump(characters, memory, indent=4, ensure_ascii=False)
+    print(f"written all characters to {memory_file_name}.\n")
     return None
 
-makeCharacter(planner, critic, initial_message)
