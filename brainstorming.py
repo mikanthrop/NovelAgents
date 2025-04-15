@@ -1,50 +1,12 @@
-from pydantic import BaseModel
-from typing import List
 from camel.agents import ChatAgent
 from camel.responses import ChatAgentResponse
 
+import ResponseFormats
 import os
 import json
 from datetime import datetime
 import re
 import traceback
-
-
-class CharacterFormat(BaseModel):
-    name: str
-    age: int
-    looks: str
-    sacred_flaw: str
-    temperament: str
-    backstory_events: List[str]
-    motivation: str
-    relationships: List[str]
-    skills: List[str]
-
-class PlotFormat(BaseModel):
-    genre: str
-    blurb: str
-    outline: str
-    act_one_outline: str
-    act_two_outline: str
-    act_three_outline: str
-    act_four_outline: str
-    act_five_outline: str
-
-class SettingFormat(BaseModel):
-    time: str
-    special_features: List[str]
-
-class ConflictFormat(BaseModel):
-    main_conflict: str
-
-class StoryGlossary(BaseModel): 
-    title: str
-    characters: List[CharacterFormat]
-    plot: PlotFormat
-    setting: SettingFormat
-    conflict: ConflictFormat
-    theme: str
 
 
 ## Opens a new json file named with a timestamp of creation and saves the first json into it
@@ -96,8 +58,8 @@ def makeCharacter(planner: ChatAgent, critic: ChatAgent,
             print(f"round_limit is {round_limit}")
 
     character_data: str 
-    input_msg: ChatAgentResponse = planner.step(initial_message, response_format=
-                             CharacterFormat)
+    input_msg: ChatAgentResponse = planner.step(initial_message, 
+                             ResponseFormats.CharacterFormat)
     character_data: str = extract_json_from_response(input_msg.msg.content) # making answer to raw json
     print(f"Response of character planner: {character_data}.\n")
 
@@ -113,7 +75,7 @@ def makeCharacter(planner: ChatAgent, critic: ChatAgent,
         if 'CAMEL_TASK_DONE' in critic_msg.msgs[0].content:
             break
 
-        planner_response = planner.step(critic_msg.msg, CharacterFormat)
+        planner_response = planner.step(critic_msg.msg, ResponseFormats.CharacterFormat)
         input_msg = planner_response
         # Making sure only plain json gets passed along
         character_data = extract_json_from_response(planner_response.msg.content)
@@ -133,11 +95,12 @@ def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_
         ValueError("round_limit must be at least 1.")
         print(f"round_limit is {round_limit}")
 
-    input_msg = planner.step(initial_message, PlotFormat)
+    input_msg = planner.step(initial_message, ResponseFormats.PlotFormat)
     plot_json = extract_json_from_response(input_msg.msg.content)
     
     print(f"The finished plot: {plot_json}")
     return plot_json
+
 
 
 ## Brainstorms the important facts for a story and adds them to a json
@@ -169,6 +132,4 @@ def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, character
         json.dump(f"{plot}\n\n", memory, indent=4, ensure_ascii=False)
     print(f"Written plot to {memory_file_name}.\n")
 
-   
     return None
-
