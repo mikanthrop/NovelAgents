@@ -63,6 +63,24 @@ def makeCharacter(planner: ChatAgent, critic: ChatAgent,
     return character_data # should be pure str
 
 
+## Thinking up the overall setting in json, then honing in on one specific part
+def makeSetting(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> str: 
+    """
+    Cycle in which planner and critic agent brainstorm setting and choose a specific part to further develop.
+    """
+
+    if round_limit < 1: 
+        ValueError("round_limit must be at least 1.")
+        print(f"round_limit is {round_limit}.")
+
+    input_msg = planner.step(initial_message, ResponseFormats.SettingFormat)
+    setting_json = extract_json_from_response(input_msg.msg.content)
+    
+    print(f"The finished setting json: {setting_json}")
+    return setting_json
+
+
+
 ## Writing down overall plot structure in json
 def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> str: 
     """
