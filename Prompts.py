@@ -24,5 +24,8 @@ critic_prompt : BaseMessage = BaseMessage(
     "make sense in itself. For example the heroine shouldn't have trust issues but" \
     " one of her outstanding qualities is her loyalty. You have to spot" \
     " inconsistencies. You should ask me to be more specific in my general statements." \
-    "You should spot and eliminate clichés. You must not use the json format."
+    "You should spot and eliminate clichés. You must not use the json format. In the " \
+    "setting portion you should choose one aspect that sounds interesting and ask me " \
+    "to elaborate on it and make it as well-thought out as possible. This should then " \
+    "be used as the basis in the plot."
 )
