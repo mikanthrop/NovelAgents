@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class CharacterFormat(BaseModel):
     name: str
@@ -16,6 +16,7 @@ class PlotFormat(BaseModel):
     genre: str
     blurb: str
     outline: str
+    main_conflict: str
     act_one_outline: str
     act_two_outline: str
     act_three_outline: str
@@ -24,15 +25,20 @@ class PlotFormat(BaseModel):
 
 class SettingFormat(BaseModel):
     time: str
-    special_features: List[str]
-
-class ConflictFormat(BaseModel):
-    main_conflict: str
+    location: str
+    geography: str
+    ecology: Optional[str]
+    historical_events: Optional[List[str]]
+    cultural_customs: Optional[List[str]]
+    cultural_structures: Optional[List[str]]
+    social_dynamics: Optional[List[str]]
+    infrastructure: Optional[List[str]]
+    current_tension: Optional[List[str]]
+    magic_system: Optional[str]
 
 class StoryGlossary(BaseModel): 
     title: str
-    characters: List[CharacterFormat]
-    plot: PlotFormat
-    setting: SettingFormat
-    conflict: ConflictFormat
     theme: str
+    characters: List[CharacterFormat]
+    setting: SettingFormat
+    plot: PlotFormat
