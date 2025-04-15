@@ -123,7 +123,21 @@ def makeCharacter(planner: ChatAgent, critic: ChatAgent,
     return character_data # should be pure str
 
 
+## Writing down overall plot structure in json
+def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> str: 
+    """
+    Cycle in which planner and critic agent specify a plot. 
+    """
 
+    if round_limit < 1: 
+        ValueError("round_limit must be at least 1.")
+        print(f"round_limit is {round_limit}")
+
+    input_msg = planner.step(initial_message, PlotFormat)
+    plot_json = extract_json_from_response(input_msg.msg.content)
+    
+    print(f"The finished plot: {plot_json}")
+    return plot_json
 
 
 ## Brainstorms the important facts for a story and adds them to a json
@@ -146,5 +160,15 @@ def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, character
     with open(memory_file_name, "w", encoding="utf-8") as memory: 
         json.dump(f"{characters_array}\n\n", memory, indent=4, ensure_ascii=False)
     print(f"written all characters to {memory_file_name}.\n")
+
+    # creates plot of story
+    plot_prompt = f"write an innovative but engaging plot for a {genre} story."
+    print(plot_prompt)
+    plot = makePlot(planner, critic, plot_prompt)
+    with open(memory_file_name, "w", encoding="utf-8") as memory: 
+        json.dump(f"{plot}\n\n", memory, indent=4, ensure_ascii=False)
+    print(f"Written plot to {memory_file_name}.\n")
+
+   
     return None
 
