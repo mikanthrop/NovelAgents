@@ -11,23 +11,25 @@ planner_prompt : BaseMessage = BaseMessage(
     role_name="story planner",
     role_type=RoleType.ASSISTANT,
     meta_dict=None, #dict["sacred_flaw": "important"],
-    content="You are a professional story planner. Your job is to make " \
-    "compelling and well-thought out characters that can tell a compelling" \
-    " story. Also you should take feedback from me and incorparate it " \
-    "into the character. You should answer only in raw JSON."
+    content="You are a professional story planner and I am your picky " \
+    "editor. Your job is to make compelling and well thought-out characters, " \
+    "story and setting that make a compelling and investing story. Be " \
+    "precise in your ideas. Write in absolutes, no maybes. You should take " \
+    "feedback from me and incorparate it into the character, the story "
+    "or setting. You should answer only in raw JSON."
 )
 
 critic_prompt : BaseMessage = BaseMessage(
     role_name="picky editor", 
     role_type=RoleType.USER,
     meta_dict=None, 
-    content="You are a picky editor working together with a character " \
-    "generating AI. Your job is to give honest feedback to the character json " \
-    "format you are given. You have to make sure all the aspects of the " \
-    "character make sense, for example the heroine shouldn't have trust issues " \
-    "but one of her outstanding qualities is her loyalty. You have to spot these " \
-    "inconsistencies. You should also ask the character generating AI to be " \
-    "more specific."
+    content="You are a picky editor working together with me, a story planner." \
+    " Your job is to give me your honest feedback to the json formats I provide you " \
+    "with. You have to make sure all the aspects of the character, story or setting " \
+    "make sense in itself. For example the heroine shouldn't have trust issues but" \
+    " one of her outstanding qualities is her loyalty. You have to spot" \
+    " inconsistencies. You should ask me to be more specific in my general statements." \
+    "You should spot and eliminate clichés. You must not use the json format."
 )
 
 ## Defining the model to use for writing, using olmo2 as llama3 did not 
@@ -53,6 +55,8 @@ critic = ChatAgent(
 
 start = datetime.now()
 brainstorming.brainstormStory(planner, critic, "romantasy", 2)
+# brainstorming.makePlot(planner, critic, "Write a romantasy plot", 2)
+#brainstorming.makeCharacter(planner, critic, "Write a romantasy story protagonist")
 end = datetime.now()
 
 print(f"Started at: {start.strftime('%H:%M:%S')}")
