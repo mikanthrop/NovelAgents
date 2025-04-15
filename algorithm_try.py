@@ -33,9 +33,10 @@ critic = ChatAgent(
 
 
 start = datetime.now()
-Brainstorming.brainstormStory(planner, critic, "romantasy", 2)
-# brainstorming.makePlot(planner, critic, "Write a romantasy plot", 2)
-#brainstorming.makeCharacter(planner, critic, "Write a romantasy story protagonist")
+#Brainstorming.brainstormStory(planner, critic, "romantasy", 1)
+#Brainstorming.makePlot(planner, critic, "Write a romantasy plot", 2)
+#Brainstorming.makeCharacter(planner, critic, "Write a romantasy story protagonist")
+Brainstorming.makeSetting(planner, critic, "Make up a setting for a sci-fi novel with aliens.")
 end = datetime.now()
 
 print(f"Started at: {start.strftime('%H:%M:%S')}")

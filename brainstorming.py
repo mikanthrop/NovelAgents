@@ -1,34 +1,11 @@
 from camel.agents import ChatAgent
 from camel.responses import ChatAgentResponse
+from StoryGlossary import StoryGlossary
 
 import ResponseFormats
-import os
 import json
-from datetime import datetime
 import re
 import traceback
-
-
-## Opens a new json file named with a timestamp of creation and saves the first json into it
-# potentially needs a pathfile in provided variables
-def create_brainstorm_json():
-    now = datetime.now()
-    timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"brainstorming_{timestamp}.json"
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump({}, f, indent=4)
-    print(f"{filename} has been set up.")
-    return filename
-
-
-## Deletes a file with the provided name if it exists
-# potentially needs to delete a file at a specific path
-def delete_brainstorm_json(filename:str):
-    if os.path.exists(filename):
-        os.remove(filename)
-        print(f"{filename} has been deleted.")
-    else: 
-        print(f"{filename} does not exist.")
 
 
 ## Using regex to get pure json from answer of planner model
@@ -43,6 +20,7 @@ def extract_json_from_response(text: str):
     except json.JSONDecodeError as e:
         print("JSONDecodeError:", e)
         print(traceback.format_exc())
+        print(json_str)
     return json.loads(json_str)
 
 
@@ -93,7 +71,7 @@ def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_
 
     if round_limit < 1: 
         ValueError("round_limit must be at least 1.")
-        print(f"round_limit is {round_limit}")
+        print(f"round_limit is {round_limit}.")
 
     input_msg = planner.step(initial_message, ResponseFormats.PlotFormat)
     plot_json = extract_json_from_response(input_msg.msg.content)
@@ -110,26 +88,20 @@ def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, character
     Process in which critic and planner generate a memory json file filled with characters, setting and plot. 
     This json file can be loaded into the next step. 
     """
-    memory_file_name = create_brainstorm_json()
-    characters_array = []
+    memory_file: StoryGlossary = StoryGlossary()
     # creates character_count characters to use in the story
     for _ in range(character_count):
         character_prompt = f"make a {_+1}. character for a {genre} story."
         print(character_prompt)
         character = makeCharacter(planner, critic, character_prompt, 1)
-        characters_array.append(character)
-        print(f"Characters array consists of: {characters_array}")
-    # Opens the memory file to write into 
-    with open(memory_file_name, "w", encoding="utf-8") as memory: 
-        json.dump(f"{characters_array}\n\n", memory, indent=4, ensure_ascii=False)
-    print(f"written all characters to {memory_file_name}.\n")
+        memory_file.add_character(character)
+    print(f"written all characters to {memory_file.filename}.\n")
 
     # creates plot of story
     plot_prompt = f"write an innovative but engaging plot for a {genre} story."
     print(plot_prompt)
     plot = makePlot(planner, critic, plot_prompt)
-    with open(memory_file_name, "w", encoding="utf-8") as memory: 
-        json.dump(f"{plot}\n\n", memory, indent=4, ensure_ascii=False)
-    print(f"Written plot to {memory_file_name}.\n")
+    memory_file.set_plot(plot)
+    print(f"Written plot to {memory_file.filename}.\n")
 
     return None
