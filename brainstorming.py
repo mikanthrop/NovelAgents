@@ -1,125 +1,167 @@
 from camel.agents import ChatAgent
 from camel.responses import ChatAgentResponse
 from StoryGlossary import StoryGlossary
+from camel.memories import AgentMemory, MemoryRecord
 
-import ResponseFormats
+
+import ResponseFormats as format
 import json
-import re
-import traceback
-
-
-## Using regex to get pure json from answer of planner model
-def extract_json_from_response(text: str): 
-    match = re.search(r"```json\s*([\s\S]*?)\s*```", text, re.DOTALL)
-    if match: 
-        json_str = match.group(1)
-    else: 
-        json_str = text
-    try: 
-        return json.loads(json_str)
-    except json.JSONDecodeError as e:
-        print("JSONDecodeError:", e)
-        print(traceback.format_exc())
-        print(json_str)
-    return json.loads(json_str)
+import StringParseUtility as util
 
 
 ## Setting up the cycle in which the planner and critic build a character
 def makeCharacter(planner: ChatAgent, critic: ChatAgent, 
-                  initial_message: str, round_limit: int = 2) -> str:
+                  initial_message: str, round_limit: int = 2) -> dict:
     """
     Cycle in which planner and critic agent design one character.
+
+    Args:
+        planner (ChatAgent): _description_
+        critic (ChatAgent): _description_
+        initial_message (str): _description_
+        round_limit (int, optional): _description_. Defaults to 2.
+
+    Returns:
+        dict: _description_
     """
 
     if round_limit < 1: 
-            ValueError("round_limit must be at least 1.")
-            print(f"round_limit is {round_limit}")
+            ValueError("round_limit must be at least 1.\n")
+            print(f"round_limit is {round_limit}.\n")
 
-    character_data: str 
-    input_msg: ChatAgentResponse = planner.step(initial_message, 
-                             ResponseFormats.CharacterFormat)
-    character_data: str = extract_json_from_response(input_msg.msg.content) # making answer to raw json
-    print(f"Response of character planner: {character_data}.\n")
+    planner_msg: ChatAgentResponse = planner.step(initial_message, format.Character)
+    character_data: json = util.clean_response_to_str(planner_msg.msg.content) # making answer to raw json
+    print(f"-----Response of character planner:-----\n{character_data}\n")
 
     # looping through to iterate the character and make general 
     # statements more specific with the critic's feedback
     for _ in range(round_limit):
-        critic_response : ChatAgentResponse = critic.step(input_msg.msg),
+        critic_response : ChatAgentResponse = critic.step(planner_msg.msg),
         critic_msg: ChatAgentResponse = critic_response[0] # Getting first object in tuple of critic_response 
-        print(f"Response of critic: {critic_msg.msg.content}.\n")
+        print(f"-----Response of critic:-----\n{critic_msg.msg.content}\n")
 
-        # Break Criteria 
-        # [TO DO]: should be changed to other criteria, for example time spent on this task
-        if 'CAMEL_TASK_DONE' in critic_msg.msgs[0].content:
-            break
+        planner_msg = planner.step(critic_msg.msgs[0], format.Character) 
+        cleaned_str : str = util.clean_response_to_str(planner_msg.msg.content)
+        clean_character: dict = json.loads(cleaned_str)
+        print(f"-----Response of character planner:-----\n{clean_character}\n")
 
-        planner_response = planner.step(critic_msg.msg, ResponseFormats.CharacterFormat)
-        input_msg = planner_response
-        # Making sure only plain json gets passed along
-        character_data = extract_json_from_response(planner_response.msg.content)
-        print(f"Response of character planner: {character_data}.\n")
-
-    print(f"The finished character json: {character_data}")
-    return character_data # should be pure str
-
-
-## Thinking up the overall setting in json, then honing in on one specific part
-def makeSetting(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> str: 
-    """
-    Cycle in which planner and critic agent brainstorm setting and choose a specific part to further develop.
-    """
-
-    if round_limit < 1: 
-        ValueError("round_limit must be at least 1.")
-        print(f"round_limit is {round_limit}.")
-
-    input_msg = planner.step(initial_message, ResponseFormats.SettingFormat)
-    setting_json = extract_json_from_response(input_msg.msg.content)
-    
-    print(f"The finished setting json: {setting_json}")
-    return setting_json
-
+    print(f"-----Final Character:-----\n{clean_character}\n")
+    return clean_character # should be dict
 
 
 ## Writing down overall plot structure in json
-def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> str: 
+def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> dict: 
     """
     Cycle in which planner and critic agent specify a plot. 
+
+    Args:
+        planner (ChatAgent): _description_
+        critic (ChatAgent): _description_
+        initial_message (str): _description_
+        round_limit (int, optional): _description_. Defaults to 2.
+
+    Returns:
+        dict: Dictionary filled with plot details.
     """
-
     if round_limit < 1: 
-        ValueError("round_limit must be at least 1.")
-        print(f"round_limit is {round_limit}.")
+        ValueError("round_limit must be at least 1.\n")
+        print(f"round_limit is {round_limit}.\n")
 
-    input_msg = planner.step(initial_message, ResponseFormats.PlotFormat)
-    plot_json = extract_json_from_response(input_msg.msg.content)
+    planner_msg : ChatAgentResponse= planner.step(initial_message, format.Plot)
+    plot_json : json = util.clean_response_to_str(planner_msg.msg.content)
+    print(f"Response of plot planner: {plot_json}\n")
+
+    for _ in range(round_limit):
+        critic_msg : ChatAgentResponse = critic.step(planner_msg.msg)
+        print(f"Response of critic: {critic_msg.msg.content}\n")
+
+        planner_msg = planner.step(critic_msg.msg, format.Plot)
+        cleaned_str : str = util.clean_response_to_str(planner_msg.msg.content)
+        clean_plot : dict = json.loads(cleaned_str)
+        print(f"Reponse of plot planner: {clean_plot}\n")
     
-    print(f"The finished plot: {plot_json}")
-    return plot_json
+    print(f"Final plot: {clean_plot}\n")
+    return clean_plot # should be dict
 
+
+## Thinking up the overall setting in json, then honing in on one specific part
+def makeSetting(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> dict: 
+    """
+    Cycle in which planner and critic agent brainstorm setting and choose a specific part to further develop.
+
+    Args:
+        planner (ChatAgent): _description_
+        critic (ChatAgent): _description_
+        initial_message (str): _description_
+        round_limit (int, optional): _description_. Defaults to 2.
+
+    Returns:
+        dict: _description_
+    """
+    if round_limit < 1: 
+        ValueError("round_limit must be at least 1.\n")
+        print(f"round_limit is {round_limit}.\n")
+    
+    # First json answer that needs refinement
+    planner_msg = planner.step(initial_message, format.Setting)
+    setting_data : dict = util.clean_response_to_str(planner_msg.msg.content)
+    print(f"Response of setting planner: {setting_data}\n")
+
+    for _ in range(round_limit):
+        critic_msg : ChatAgentResponse = critic.step(planner_msg.msg)
+        print(f"Response of critic: {critic_msg.msg.content}\n")
+
+        planner_msg = planner.step(critic_msg.msg, format.Setting)
+        cleaned_str : str = util.clean_response_to_str(planner_msg.msg.content)
+        clean_setting: dict = json.loads(cleaned_str) 
+        print(f"Reponse of setting planner: {clean_setting}")
+    
+    print(f"Final setting: {clean_setting}\n")
+    return clean_setting
 
 
 ## Brainstorms the important facts for a story and adds them to a json
 #  glossary that functions as memory storage
-def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, character_count: int) -> None: 
-    """
-    Process in which critic and planner generate a memory json file filled with characters, setting and plot. 
-    This json file can be loaded into the next step. 
+def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience: str, theme: str, character_count: int) -> None: 
+    """_summary_
+
+    Args:
+        planner (ChatAgent): The agent that plans the story, only answers in json.
+        critic (ChatAgent): The agent that gives feedback to the json anwers.
+        genre (str): The genre of the story that the agents should brainstorm.
+        audience (str): The audience of the story that the agents should brainstorm.
+        theme (str): The theme of the story that the agents should brainstorm.
+        character_count (int): Number of characters the agents should brainstorm for the story.
+
+    Returns:
+        None
     """
     memory_file: StoryGlossary = StoryGlossary()
+    memory_file.set_theme(theme)
+
     # creates character_count characters to use in the story
     for _ in range(character_count):
-        character_prompt = f"make a {_+1}. character for a {genre} story."
-        print(character_prompt)
-        character = makeCharacter(planner, critic, character_prompt, 1)
+        character_prompt = f"Make a {_+1}. character for a {genre} story aimed at {audience} with a theme of {theme}."
+        print(f"{character_prompt}\n")
+        character: format.Character = makeCharacter(planner, critic, character_prompt, 1)
         memory_file.add_character(character)
-    print(f"written all characters to {memory_file.filename}.\n")
+    print(f"Finished brainstorming characters.\n")
+
+    # creates setting of story
+    setting_prompt = f"Create an innovative but engaging setting for a {genre} story aimed at {audience} with a theme of {theme}."
+    print(f"{setting_prompt}\n")
+    setting : format.Setting = makeSetting(planner, critic, setting_prompt, 1)
+    memory_file.set_setting(setting)
+    print(f"Finished brainstorming setting.\n")
 
     # creates plot of story
-    plot_prompt = f"write an innovative but engaging plot for a {genre} story."
-    print(plot_prompt)
-    plot = makePlot(planner, critic, plot_prompt)
+    plot_prompt = f"Write an innovative but engaging plot for a {genre} story aimed at {audience} with a theme of {theme}."
+    print(f"{plot_prompt}\n")
+    plot : format.Plot = makePlot(planner, critic, plot_prompt, 1)
     memory_file.set_plot(plot)
-    print(f"Written plot to {memory_file.filename}.\n")
+    print(f"Finished brainstorming plot.\n")
+
+    print(f"the whole story glossary: {memory_file.to_dict()}")
+    memory_file.save_to_json()
 
     return None
