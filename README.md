@@ -19,3 +19,8 @@
  Maybe I can try if an AI society would be faster with this. 
  I also do not know, if the characters are generated with knowledge of the characters generated previously. But for further generation
  of Plot and the like I should load the memory json file into the brainstorming agents. 
+
+ # Open Issues
+ - Fallback for repeated answers has to be implemented: If an answer towards the end of the cycle fails to load into a pydanctic model it should instead use an earlier functioning answer instead to write to memory.
+ - SavingIssueExpection from StoryGlossary.py isn't declared anywhere 
+ - 
