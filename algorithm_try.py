@@ -1,17 +1,22 @@
 from camel.models import ModelFactory
 from camel.types import ModelPlatformType
-from camel.agents import ChatAgent
+from camel.agents import ChatAgent, TaskPlannerAgent
 from datetime import datetime
 
-import Brainstorming
 import Prompts
+import Brainstorming
+import Drafting
+import Rewriting
+import os
 
+open_api_key = os.environ["OPENAI_API_KEY"]
 
-## Defining the model to use for writing, using olmo2 as llama3 did not 
+# BRAINSTORMING
+# Defining the model to use for writing, using olmo2 as llama3 did not 
 # write that well
 model = ModelFactory.create(
-    model_platform=ModelPlatformType.OLLAMA,
-    model_type="olmo2", 
+    model_platform=ModelPlatformType.OPENAI,
+    model_type="gpt-4o-mini", 
     model_config_dict={"temperature": 0.6},
 )
 
@@ -28,15 +33,69 @@ critic = ChatAgent(
     token_limit=10000,
 )
 
+#--------------------
+
+## WRITING
+
+# model = ModelFactory.create(
+#     model_platform=ModelPlatformType.OLLAMA,
+#     model_type="olmo2", 
+#     model_config_dict={"temperature": 0.7},
+# )
+
+taskmaster1 : TaskPlannerAgent = TaskPlannerAgent(
+    model=model
+)
+
+writing_model = ModelFactory.create(
+    model_platform=ModelPlatformType.OPENAI, 
+    model_type="gpt-4o-mini", 
+    model_config_dict={"temperature": 0.65},
+)
+
+writer = ChatAgent(
+    system_message=Prompts.scene_writing_prompt,
+    model=writing_model,
+    token_limit=None
+)
+
+# --------
+
+## FEEDBACKING
+model = ModelFactory.create(
+    model_platform=ModelPlatformType.OPENAI, 
+    model_type="gpt-4o-mini"
+)
+
+feedback_chatty: ChatAgent = ChatAgent(
+system_message=Prompts.feedback_prompt, 
+model=model
+)
+
+rewrite_chatty: ChatAgent = ChatAgent(
+    system_message=Prompts.rewrite_prompt,
+    model=model
+)
 
 
 
 
+# the algorithm that actually does stuff
 start = datetime.now()
-Brainstorming.brainstormStory(planner, critic, "dark romance", "females 20 - 24", "drama", 2)
-#Brainstorming.makeCharacter(planner, critic, "Write a children's book story protagonist for ages 5 to 8.",1)
-#Brainstorming.makePlot(planner, critic, "Write a romantasy plot", 2)
-#Brainstorming.makeSetting(planner, critic, "Make up a setting for a childrens book for ages 5 to 8.")
+
+## BRAINSTORMING
+memory_file = Brainstorming.brainstormStory(planner, critic, "science fiction thriller", "adults, aged 25 and up", "murder on a space station", 2)
+
+## WRITING
+
+scene_prompts: list[str] = Drafting.run_planner(taskmaster1, memory_file)
+
+written_scenes: dict = Drafting.write_scenes(writer, feedback_chatty, rewrite_chatty, scene_prompts)
+Rewriting.save_to_txt(written_scenes)
+
+## FEEDBACKING
+
+
 end = datetime.now()
 
 print(f"Started at: {start.strftime('%H:%M:%S')}")
