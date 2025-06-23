@@ -1,4 +1,5 @@
 from camel.messages import BaseMessage
+from camel.prompts import TextPrompt
 from camel.types import RoleType
 
 
@@ -50,7 +51,7 @@ critic_prompt_original: str = "You are a picky editor working together with me, 
     "giving you plot json. You should also make sure, that every information I provide " \
     "is used in a sensible way, especially when writing the plot."
 
-critic_prompt_structured: str = "You are a picky editor, and I am a story planner. Your " \
+brainstorming_critic_prompt: str = "You are a picky editor, and I am a story planner. Your " \
 "role is to critically evaluate the story content I provide you with. Your core " \
 "responsibilities are: 1. Ensure that all aspects of the character, story, or setting " \
 "make internal sense and are consistent. 2. Identify and highlight inconsistencies " \
@@ -72,3 +73,35 @@ critic_prompt : BaseMessage = BaseMessage(
     meta_dict=None, 
     content=critic_prompt_original
 )
+
+scene_planning_prompt: TextPrompt = TextPrompt(f"You are an organizer working together with a professional writer " \
+"and a professional book critic. You have all the knowledge of the story you want the writer to write. You are " \
+"to break down the task of writing the following story into scenes that the writer can then write and the critic can " \
+"then review and criticise. The story takes place in {setting}. The following characters are involved in the story: " \
+"{characters}. The overall plot of the story should look something like this {plot}. You should follow these ideas " \
+"to make up short scene tasks. You should seperate each new scene with the tag 'New Scene'. You should give information " \
+"in a structured way. Give structured information on: - where the scene takes place, - which characters are part of the scene and what " \
+"their intentions are, - what conflict the scene has given the characters intentions, - what the outcome of the scene is. " \
+"Write as many scenes as you need to tell the whole story in an interesting and cohesive way."
+)
+
+scene_writing_prompt: TextPrompt = TextPrompt(f"You are a professional writer and I am a professional organizer. " \
+"I have all the knowledge of the story you should write and I will give it to you in form of scene descriptions. " \
+"You should write those scenes using language used in a novel, interesting dialogue, subtext, descriptions and so on. " \
+"You should make sure to encompass all of the information of the given scene prompt in your writing. Continue the scene until the resolution of the scene prompt or your token limit has been reached." \
+"Write in plain text." \
+"Here is what you should know about the story: The story takes place in {setting}. The following characters are involved in the story: " \
+"{characters}. The overall plot of the story moves in this direction: {plot}. Make sure what you write is cohesive with " \
+"these elements."
+)
+
+feedback_prompt: TextPrompt = TextPrompt(f"You are a professional text critic working together with me, a professional text rewriter. Your " \
+"task is to give me pointers on what I should take into consideration when I rewrite the given text. Make sure the story is interesting to the " \
+"reader, everything is well understandable and the continuity of the story is alright. Take into consideration the emotional impact of the " \
+"writing and how clichéd the story and the writing is.")
+
+rewrite_prompt: TextPrompt = TextPrompt(f"You are a professional text rewriter working together with me, a professional " \
+"text critic. Your job is to take my feedback and rewrite the story to make it better than the previous " \
+"draft. You will get the text and the feedback as input. Write in the past and take into consideration the "\
+"critic's feedback. Rewrite scene to scene. If scenes are missing, make up new ones that fit the flow of the story. "\
+"Your rewrite has to be one continuous text. Use more straightforward writing in your text.")
