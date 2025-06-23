@@ -5,6 +5,17 @@ import json
 import pythonmonkey
 
 def _extract_first_json_object(text: str) -> str:
+    """_summary_
+
+    Args:
+        text (str): _description_
+
+    Raises:
+        ValueError: _description_
+
+    Returns:
+        str: _description_
+    """    
     brace_count = 0
     in_string = False
     escape = False
@@ -33,6 +44,14 @@ def _extract_first_json_object(text: str) -> str:
 
 ## Using regex to get pure json from answer of planner model
 def clean_response_to_str(text: str) -> str: 
+    """_summary_
+
+    Args:
+        text (str): _description_
+
+    Returns:
+        str: _description_
+    """    
     # Finding first valid JSON object in response
     try: 
         _extract_first_json_object(text)
@@ -49,29 +68,32 @@ def clean_response_to_str(text: str) -> str:
 
     # Clean common issues
     jsonrepair = pythonmonkey.require('jsonrepair').jsonrepair
-    print(f"String after repair: {jsonrepair}")
     cleaned_json = jsonrepair(json_str)
     cleaned_json = re.sub(r'[\"\']null[\"\']', "null", cleaned_json)
-    # json_str = re.sub(r"[`´]", "'", json_str)  # Replace all single quotes with '
-    # json_str = re.sub(r'[“”«»]', '"', json_str)  # Replace all double quotes with "
-    # json_str = re.sub(r"\"\"", r"\"", json_str)  # Fix double quotes
-    # json_str = re.sub(r"\\\"", r"\"", json_str)  # Fix escaped quotes
-    # json_str = re.sub(r"\" \"", r"\", \"", json_str)  # Fix missing comma between values in list
-    # json_str = re.sub(r'(")(\s*)("(?=[^"]*?":))', r'\1,\2\3', json_str) # Fix missing comma between values in dicts
-    # json_str = re.sub(r",\s*([\]}])", r"\1", json_str)  # Remove trailing commas
-
-    print(f"Cleaned json: {cleaned_json}")
 
     return json_str
 
 def _get_model_keys(model_class: BaseModel):
-    """
-    Extracts the keys (field names) from a Pydantic model class.
-    """
+    """Extracts the keys (field names) from a Pydantic model class.
+
+    Args:
+        model_class (BaseModel): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     return list(model_class.model_fields.keys())
 
 
 def build_model_from_string(input_str: str) -> BaseModel:
+    """_summary_
+
+    Args:
+        input_str (str): _description_
+
+    Returns:
+        BaseModel: _description_
+    """    
     # Find out what specific type of BaseModel the incoming object is, using the first key 
     # of each Schema. To cut time and circumvent errors, the json is sliced first
     model_class : BaseModel

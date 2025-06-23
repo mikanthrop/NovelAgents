@@ -1,7 +1,19 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
 
 class Character(BaseModel):
+    """Character model. Inherits from BaseModel of the pydantic package. Has following attributes:\n
+    name: *str*\n
+    age: *int*\n
+    looks: *str*\n
+    sacred_flaw: *str*\n
+    temperament: *str*\n
+    backstory_events: *List[str]*\n
+    motivation: *str*\n
+    relationships: *List[str]*\n
+    skills: *List[str]*\n
+    misc_information: *Optional[dict]*
+    """    
     name: str
     age: int
     looks: str
@@ -11,9 +23,14 @@ class Character(BaseModel):
     motivation: str
     relationships: List[str]
     skills: List[str]
-    misc_information: Optional[dict]
+    misc_information: Optional[Dict[str, str]]
 
     def to_dict(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """        
         return {
             "name": self.name,
             "age": self.age,
@@ -28,6 +45,14 @@ class Character(BaseModel):
         }
 
 class Plot(BaseModel):
+    """_summary_
+
+    Args:
+        BaseModel (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     genre: str
     blurb: str
     overall_outline: str
@@ -37,9 +62,14 @@ class Plot(BaseModel):
     act_three_outline: str
     act_four_outline: str
     act_five_outline: str
-    misc_information: Optional[dict]
+    misc_information: Optional[Dict[str, str]]
 
     def to_dict(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """        
         return {
             "genre": self.genre,
             "blurb": self.blurb,
@@ -54,6 +84,14 @@ class Plot(BaseModel):
         }
 
 class Setting(BaseModel):
+    """_summary_
+
+    Args:
+        BaseModel (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
     time: str
     location: str
     geography: str
@@ -64,10 +102,15 @@ class Setting(BaseModel):
     social_dynamics: Optional[List[str]]
     infrastructure: Optional[List[str]]
     current_tension: Optional[List[str]]
-    magic_system: Optional[str] | Optional[dict]
-    misc_information: Optional[dict]
+    magic_system: Optional[str] | Optional[Dict[str, str]]
+    misc_information: Optional[Dict[str, str]]
     
     def to_dict(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """        
         return {
             "time": self.time,
             "location": self.location,
@@ -84,6 +127,11 @@ class Setting(BaseModel):
         }
 
 class StoryGlossary(BaseModel): 
+    """_summary_
+
+    Args:
+        BaseModel (_type_): _description_
+    """    
     title: str
     theme: str
     characters: List[Character] 
