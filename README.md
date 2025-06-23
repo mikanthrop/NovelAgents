@@ -23,4 +23,7 @@
  # Open Issues
  - Fallback for repeated answers has to be implemented: If an answer towards the end of the cycle fails to load into a pydanctic model it should instead use an earlier functioning answer instead to write to memory.
  - SavingIssueExpection from StoryGlossary.py isn't declared anywhere 
- - 
+ - Problem with running the same model for too long. when tasked to write ten scenes, it crashes after four to five scenes because of time out. I have to figure out, if that is only because of my machine or if that also happens on other machines. 
+
+ # Tasks for Tomorrow
+ - Refactoring of Code
