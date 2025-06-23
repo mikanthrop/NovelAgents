@@ -2,11 +2,13 @@ from camel.agents import ChatAgent
 from camel.responses import ChatAgentResponse
 from StoryGlossary import StoryGlossary
 from camel.memories import AgentMemory, MemoryRecord
-
+from camel.models.model_manager import ModelProcessingError
+from typing import Dict
 
 import ResponseFormats as format
 import json
 import StringParseUtility as util
+from Drafting import restart_model
 
 
 ## Setting up the cycle in which the planner and critic build a character
@@ -45,7 +47,6 @@ def makeCharacter(planner: ChatAgent, critic: ChatAgent,
         clean_character: dict = json.loads(cleaned_str)
         print(f"-----Response of character planner:-----\n{clean_character}\n")
 
-    print(f"-----Final Character:-----\n{clean_character}\n")
     return clean_character # should be dict
 
 
@@ -67,20 +68,40 @@ def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_
         ValueError("round_limit must be at least 1.\n")
         print(f"round_limit is {round_limit}.\n")
 
-    planner_msg : ChatAgentResponse= planner.step(initial_message, format.Plot)
+    while True: 
+        try: 
+            planner_msg : ChatAgentResponse= planner.step(initial_message, format.Plot)
+            break
+        except ModelProcessingError as e: 
+            print(f"Initial planner step failed: {e}. Restarting model.")
+            restart_model(planner)
+    
     plot_json : json = util.clean_response_to_str(planner_msg.msg.content)
-    print(f"Response of plot planner: {plot_json}\n")
+    print(f"-----Response of plot planner:-----\n{plot_json}\n")
 
     for _ in range(round_limit):
-        critic_msg : ChatAgentResponse = critic.step(planner_msg.msg)
-        print(f"Response of critic: {critic_msg.msg.content}\n")
+        while True: 
+            try: 
+                critic_msg : ChatAgentResponse = critic.step(planner_msg.msg)
+                break
+            except ModelProcessingError as e: 
+                print(f"Critic step {_+1} failed: {e}. Restarting model.")
+                restart_model(critic)
 
-        planner_msg = planner.step(critic_msg.msg, format.Plot)
+        print(f"-----Response of critic:-----\n{critic_msg.msg.content}\n")
+
+        while True: 
+            try: 
+                planner_msg = planner.step(critic_msg.msg, format.Plot)
+                break
+            except ModelProcessingError as e: 
+                print(f"Planner step {_+1} failed: {e}. Restarting model.")
+                restart_model(planner)
+
         cleaned_str : str = util.clean_response_to_str(planner_msg.msg.content)
         clean_plot : dict = json.loads(cleaned_str)
-        print(f"Reponse of plot planner: {clean_plot}\n")
+        print(f"-----Response of plot planner:-----\n{clean_plot}\n")
     
-    print(f"Final plot: {clean_plot}\n")
     return clean_plot # should be dict
 
 
@@ -105,24 +126,27 @@ def makeSetting(planner: ChatAgent, critic: ChatAgent, initial_message: str, rou
     # First json answer that needs refinement
     planner_msg = planner.step(initial_message, format.Setting)
     setting_data : dict = util.clean_response_to_str(planner_msg.msg.content)
-    print(f"Response of setting planner: {setting_data}\n")
+    print(f"-----Response of setting planner:-----\n{setting_data}\n")
 
     for _ in range(round_limit):
         critic_msg : ChatAgentResponse = critic.step(planner_msg.msg)
-        print(f"Response of critic: {critic_msg.msg.content}\n")
+        print(f"-----Response of critic:-----\n{critic_msg.msg.content}\n")
 
         planner_msg = planner.step(critic_msg.msg, format.Setting)
         cleaned_str : str = util.clean_response_to_str(planner_msg.msg.content)
         clean_setting: dict = json.loads(cleaned_str) 
-        print(f"Reponse of setting planner: {clean_setting}")
+        print(f"-----Response of setting planner:-----\n{clean_setting}")
     
-    print(f"Final setting: {clean_setting}\n")
     return clean_setting
+
+def makeTitle(planner: ChatAgent) -> str:
+    title_msg = planner.step("Give the story we have created a title.")
+    return title_msg.msg.content
 
 
 ## Brainstorms the important facts for a story and adds them to a json
 #  glossary that functions as memory storage
-def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience: str, theme: str, character_count: int) -> None: 
+def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience: str, theme: str, character_count: int) -> str: 
     """_summary_
 
     Args:
@@ -161,7 +185,14 @@ def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience:
     memory_file.set_plot(plot)
     print(f"Finished brainstorming plot.\n")
 
-    print(f"the whole story glossary: {memory_file.to_dict()}")
-    memory_file.save_to_json()
+    # gives the story a title
+    title = makeTitle(planner)
+    if title is Dict:
+        title = title("title")
+    if title is str: 
+        memory_file.set_title(title)
 
-    return None
+    print(f"the whole story glossary: {memory_file.to_dict()}")
+    memory_file.save()
+
+    return memory_file.filename
