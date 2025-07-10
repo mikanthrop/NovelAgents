@@ -18,7 +18,7 @@ class StoryGlossary(BaseKeyValueStorage):
         filename = f"brainstorming_{timestamp}.json"
         self.filename : str = filename
         print(f"{filename} has been set up.")
-        self.data: ResponseFormats.StoryGlossary = ResponseFormats.StoryGlossary(title="", theme="", characters=[], plot=None, setting=None)
+        self.data: ResponseFormats.StoryGlossary = ResponseFormats.StoryGlossary(title="", theme="", audience="", genre="", characters=[], plot=None, setting=None)
         self.load()
 
     def load(self):
@@ -38,9 +38,9 @@ class StoryGlossary(BaseKeyValueStorage):
                     print(f"Data after conversion: {self.data}")  # Debugging line
             except (json.JSONDecodeError, ValueError):
                 print("Error loading or invalid data format, initializing with default values.")
-                self.data = ResponseFormats.StoryGlossary(title="", theme="", characters=[], plot=None, setting=None)
+                self.data = ResponseFormats.StoryGlossary(title="", theme="", audience="", genre="", characters=[], plot=None, setting=None)
         else:
-            self.data = ResponseFormats.StoryGlossary(title="", theme="", characters=[], plot=None, setting=None)
+            self.data = ResponseFormats.StoryGlossary(title="", theme="", audience="", genre="", characters=[], plot=None, setting=None)
 
     def save(self):
         """_summary_
@@ -57,6 +57,8 @@ class StoryGlossary(BaseKeyValueStorage):
         return {
             "title": self.data.title,
             "theme": self.data.theme,
+            "audience": self.data.audience,
+            "genre": self.data.genre,
             "characters": [character.to_dict() if hasattr(character, 'to_dict') else character for character in self.data.characters],
             "setting": self.data.setting.to_dict() if hasattr(self.data.setting, 'to_dict') else self.data.setting,
             "plot": self.data.plot.to_dict() if hasattr(self.data.plot, 'to_dict') else self.data.plot
@@ -77,6 +79,22 @@ class StoryGlossary(BaseKeyValueStorage):
             theme (str): _description_
         """        
         self.data.theme = theme
+
+    def set_audience(self, audience: str): 
+        """Set the audience in the story glossary json file. Always overwrites.
+
+        Args:
+            audience (str): _description_
+        """ 
+        self.data.audience = audience
+
+    def set_genre(self, genre: str):
+        """Set the genre in the story glossary json file. Always overwrites.
+
+        Args:
+            genre (str): _description_
+        """ 
+        self.data.genre = genre
 
     def add_character(self, character: dict):
         """Adds a character json to the story glossary json file.

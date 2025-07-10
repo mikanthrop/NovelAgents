@@ -146,7 +146,7 @@ def makeTitle(planner: ChatAgent) -> str:
 
 ## Brainstorms the important facts for a story and adds them to a json
 #  glossary that functions as memory storage
-def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience: str, theme: str, character_count: int) -> str: 
+def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience: str, theme: str, character_count: int, revision_number: int) -> dict: 
     """_summary_
 
     Args:
@@ -160,39 +160,48 @@ def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience:
     Returns:
         None
     """
-    memory_file: StoryGlossary = StoryGlossary()
-    memory_file.set_theme(theme)
+    story_glossary: StoryGlossary = StoryGlossary()
+    story_glossary.set_theme(theme)
+    story_glossary.set_audience(audience)
+    story_glossary.set_genre(genre)
 
     # creates character_count characters to use in the story
     for _ in range(character_count):
-        character_prompt = f"Make a {_+1}. character for a {genre} story aimed at {audience} with a theme of {theme}."
+        if _ == 0:
+            character_prompt = f"Make a {_+1}. character for a {genre} story aimed at {audience} with a theme of {theme}."
+        else: 
+            character_prompt = f"Brainstorm a character that surrounds the character of {main_character['name']} in this {genre} story aimed at {audience} with a theme of {theme}. It's best if you flesh out a character that already ties into the main character but hasn't been worked on already. Think about what characters the story already has and what kind of character it still needs to make a compelling story."
         print(f"{character_prompt}\n")
-        character: format.Character = makeCharacter(planner, critic, character_prompt, 1)
-        memory_file.add_character(character)
+        character: format.Character = makeCharacter(planner, critic, character_prompt, revision_number)
+        if _ == 0: 
+            main_character = character
+        story_glossary.add_character(character)
     print(f"Finished brainstorming characters.\n")
 
     # creates setting of story
     setting_prompt = f"Create an innovative but engaging setting for a {genre} story aimed at {audience} with a theme of {theme}."
     print(f"{setting_prompt}\n")
-    setting : format.Setting = makeSetting(planner, critic, setting_prompt, 1)
-    memory_file.set_setting(setting)
+    setting : format.Setting = makeSetting(planner, critic, setting_prompt, revision_number)
+    story_glossary.set_setting(setting)
     print(f"Finished brainstorming setting.\n")
 
     # creates plot of story
     plot_prompt = f"Write an innovative but engaging plot for a {genre} story aimed at {audience} with a theme of {theme}."
     print(f"{plot_prompt}\n")
-    plot : format.Plot = makePlot(planner, critic, plot_prompt, 1)
-    memory_file.set_plot(plot)
+    plot : format.Plot = makePlot(planner, critic, plot_prompt, revision_number)
+    story_glossary.set_plot(plot)
     print(f"Finished brainstorming plot.\n")
 
     # gives the story a title
     title = makeTitle(planner)
     if title is Dict:
-        title = title("title")
+        story_glossary.set_title = title("title")
     if title is str: 
-        memory_file.set_title(title)
+        story_glossary.set_title(title)
 
-    print(f"the whole story glossary: {memory_file.to_dict()}")
-    memory_file.save()
+    print(f"the whole story glossary: {story_glossary.to_dict()}")
+    return story_glossary
 
-    return memory_file.filename
+def save_glossary_to_json_file(brainstorm_data: StoryGlossary) -> str:
+    brainstorm_data.save()
+    return brainstorm_data.filename

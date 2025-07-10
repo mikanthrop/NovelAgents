@@ -2,11 +2,13 @@
 from camel.agents import ChatAgent, TaskPlannerAgent
 from camel.prompts import TextPrompt
 from camel.models.model_manager import ModelProcessingError
+from StoryGlossary import StoryGlossary
 import Prompts
 import Rewriting
 import json
 import time
 import subprocess
+from datetime import datetime
 
 
 def split_scenes(all_scenes: str) -> list[str]:
@@ -44,12 +46,9 @@ def restart_model(model):
     except Exception as e:
         print(f"[ERROR] Failed to restart model: {e}")
 
-    
-
 
 ## approach of loading the json memory file into the task planner prompt: 
-
-def set_planner_prompt(memory_path: str) -> TextPrompt: 
+def set_planner_prompt(story_glossary: StoryGlossary, scene_number: int) -> TextPrompt: 
     """_summary_
 
     Args:
@@ -58,11 +57,8 @@ def set_planner_prompt(memory_path: str) -> TextPrompt:
     Returns:
         TextPrompt: _description_
     """    
-    ## TODO: Check if memory_path is a valid path
-    story_data: dict
-    with open(memory_path, "r") as f:
-        story_data = json.load(f)
-
+    story_data: dict = story_glossary.to_dict()
+  
     setting = story_data.get("setting", "Make something up that fits the characters and the plot.")
     characters_data = story_data.get("characters", [])
     characters =  "\n\n".join(json.dumps(c, indent=2) for c in characters_data) or "Make up characters that fit the setting and plot."
@@ -71,12 +67,22 @@ def set_planner_prompt(memory_path: str) -> TextPrompt:
     formatted_task_planner_prompt: TextPrompt = Prompts.scene_planning_prompt.format(
         setting=setting, 
         characters=characters,
-        plot=plot
+        plot=plot,
+        scene_number=scene_number
     )
     return formatted_task_planner_prompt
     
 
-def run_planner(task_master: TaskPlannerAgent, memory_path: str) -> list[str]:
+def save_scene_prompts_to_txt(scene_prompts: list[str]) -> str: 
+    now = datetime.now()
+    timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"scene_planning_{timestamp}.txt"
+    with open(filename, "w", encoding="utf-8") as f: 
+        for _ in range(len(scene_prompts)):
+            f.write(f"Szene {_}: {scene_prompts[_]}\n")
+
+
+def run_planner(task_master: TaskPlannerAgent, story_glossary: StoryGlossary, scene_number: int) -> list[str]:
     """_summary_
 
     Args:
@@ -86,13 +92,13 @@ def run_planner(task_master: TaskPlannerAgent, memory_path: str) -> list[str]:
     Returns:
         list[str]: _description_
     """    
-    planner_prompt: TextPrompt = set_planner_prompt(memory_path)
+    planner_prompt: TextPrompt = set_planner_prompt(story_glossary, scene_number)
 
     all_scenes = task_master.run(planner_prompt)
-    scene_writing_prompts : list[str] = split_scenes(all_scenes)
+    scene_prompts : list[str] = split_scenes(all_scenes)
     print(f"Scene writing prompts: {all_scenes}")
 
-    return scene_writing_prompts
+    return scene_prompts
 
 
 def write_scenes(writer: ChatAgent, critic: ChatAgent, rewriter: ChatAgent, scene_prompts: list[str]) -> dict:

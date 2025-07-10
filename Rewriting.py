@@ -35,7 +35,7 @@ def rewrite(rewriter: ChatAgent, critic: ChatAgent, writing_file: str) -> str:
     return text
 
 
-def save_to_txt(written_scenes: dict) -> None:
+def save_story_to_txt(written_scenes: dict) -> None:
     now = datetime.now()
     timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
     filename = f"writing_{timestamp}.txt"

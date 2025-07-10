@@ -134,6 +134,8 @@ class StoryGlossary(BaseModel):
     """    
     title: str
     theme: str
+    audience: str
+    genre: str
     characters: List[Character] 
     setting: Setting | None
     plot: Plot | None
