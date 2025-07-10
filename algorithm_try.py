@@ -23,14 +23,12 @@ model = ModelFactory.create(
 ## Create the planner AI agent with a designated system message 
 planner = ChatAgent(
     system_message=Prompts.planner_prompt, 
-    model=model,
-    token_limit=10000,
+    model=model
 )
 
 critic = ChatAgent(
     system_message=Prompts.critic_prompt, 
-    model=model, 
-    token_limit=10000,
+    model=model
 )
 
 #--------------------
@@ -67,12 +65,12 @@ model = ModelFactory.create(
     model_type="gpt-4o-mini"
 )
 
-feedback_chatty: ChatAgent = ChatAgent(
-system_message=Prompts.feedback_prompt, 
-model=model
+feedback_agent: ChatAgent = ChatAgent(
+    system_message=Prompts.feedback_prompt, 
+    model=model
 )
 
-rewrite_chatty: ChatAgent = ChatAgent(
+rewrite_agent: ChatAgent = ChatAgent(
     system_message=Prompts.rewrite_prompt,
     model=model
 )
@@ -90,7 +88,7 @@ memory_file = Brainstorming.brainstormStory(planner, critic, "science fiction th
 
 scene_prompts: list[str] = Drafting.run_planner(taskmaster1, memory_file)
 
-written_scenes: dict = Drafting.write_scenes(writer, feedback_chatty, rewrite_chatty, scene_prompts)
+written_scenes: dict = Drafting.write_scenes(writer, feedback_agent, rewrite_agent, scene_prompts)
 Rewriting.save_to_txt(written_scenes)
 
 ## FEEDBACKING
