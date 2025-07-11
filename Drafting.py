@@ -133,6 +133,7 @@ def write_scenes(writer: ChatAgent, critic: ChatAgent, scene_prompts: list[str])
             print(f"Error in scene {i+1}: {e}. Restarting model...")
             restart_model(writer)
 
+        # TODO check if writer_msg.msg.content == None and act accordingly
         writing[f"Chapter{i+1}"] = writer_msg.msg.content
         print(f"\nChapter {loop_nr}: \n{writer_msg.msg.content}")
         
