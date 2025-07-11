@@ -89,20 +89,18 @@ scene_planning_prompt: TextPrompt = TextPrompt(f"You are a novel organizer worki
 "Write {scene_number} scenes. Try to split them evenly between the five acts."
 )
 
-scene_writing_prompt: TextPrompt = TextPrompt(f"You are a professional novel writer and I am a professional organizer. " \
-"I have all the knowledge of the story you should write and I will give it to you in form of scene descriptions. " \
+scene_writing_prompt: TextPrompt = TextPrompt(f"You are a professional novel writer working together with a professional organizer and a professional text critique. " \
+"The professional organizer has all the knowledge about the story you should write and they will give it to you in form of scene descriptions. " \
 "You should write those scenes as chapters using language used in a novel, interesting dialogue, subtext, descriptions and so on. " \
 "You should make sure to encompass all of the information of the given scene prompt in your writing. Continue the scene until the resolution of the scene prompt or your token limit has been reached." \
-"Write in language that is acceptable for the stories target audience. Make sure what you write is cohesive."
+"Write in language that is acceptable for the stories target audience. Make sure what you write is cohesive. When you get a text as an input and feedback concerning this text, then " \
+"your job is to revise the chapter you have been given. When you rewrite a chapter your goal should be to make it better than the previous version. You should write " \
+"in the past tense and take the feedback into consideration as you rewrite a chapter. Your rewrite has to be one continuous text. Use straightforward writing in your text. "\
+"As the writer, you should know who the character are, where the setting takes place and what the plot is. These are the characters: {characters}. This is " \
+" the setting: {setting}. And this is the plot: {plot}."
 )
 
 feedback_prompt: TextPrompt = TextPrompt(f"You are a professional novel chapter critic working together with me, a professional text rewriter. Your " \
 "task is to give me pointers on what I should take into consideration when I rewrite the given chapter. Make sure the chapter is interesting to the " \
 "reader, everything is well understandable and the chapter fits into possible earlier chapters. Take into consideration the emotional impact of the " \
 "writing and how clichéd the writing is.")
-
-rewrite_prompt: TextPrompt = TextPrompt(f"You are a professional novel chapter rewriter working together with me, a professional " \
-"text critic. Your job is to take my feedback and rewrite the chapter to make it better than the previous " \
-"draft. You will get the chapter and the feedback as input. Write in the past tense and take my feedback into consideration. "\
-"Rewrite scene to scene. If scenes are missing, make up new ones that fit the flow of the story. " \
-"Your rewrite has to be one continuous text. Use straightforward writing in your text.")

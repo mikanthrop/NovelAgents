@@ -71,6 +71,9 @@ class StoryGlossary(BaseKeyValueStorage):
             title (str): _description_
         """        
         self.data.title = title
+    
+    def get_title(self) -> str:
+        return self.data.title
 
     def set_theme(self, theme: str): 
         """Set the theme in the story glossary json file. Always overwrites.
@@ -80,6 +83,9 @@ class StoryGlossary(BaseKeyValueStorage):
         """        
         self.data.theme = theme
 
+    def get_theme(self) -> str:
+        return self.data.theme
+
     def set_audience(self, audience: str): 
         """Set the audience in the story glossary json file. Always overwrites.
 
@@ -88,6 +94,9 @@ class StoryGlossary(BaseKeyValueStorage):
         """ 
         self.data.audience = audience
 
+    def get_audience(self) -> str:
+        return self.data.audience
+
     def set_genre(self, genre: str):
         """Set the genre in the story glossary json file. Always overwrites.
 
@@ -95,6 +104,9 @@ class StoryGlossary(BaseKeyValueStorage):
             genre (str): _description_
         """ 
         self.data.genre = genre
+    
+    def get_genre(self) -> str:
+        return self.data.genre
 
     def add_character(self, character: dict):
         """Adds a character json to the story glossary json file.
@@ -109,6 +121,9 @@ class StoryGlossary(BaseKeyValueStorage):
         else:
             print(f"Invalid character format: {character}")
     
+    def get_characters(self) -> dict:
+        return "\n\n".join(json.dumps(c, indent=2) for c in self.data.characters)
+    
     def set_setting(self, setting: dict):
         """Set the setting in the story glossary json file. Always overwrites.
 
@@ -120,6 +135,9 @@ class StoryGlossary(BaseKeyValueStorage):
             self.data.setting = setting
         else:
             print(f"Invalid setting format: {setting}")
+
+    def get_setting(self) -> dict:
+        return self.data.setting.to_dict()
 
     def set_plot(self, plot: dict):
         """Set the plot in the story glossary json file. Always overwrites. 
@@ -135,6 +153,9 @@ class StoryGlossary(BaseKeyValueStorage):
             self.data.plot = plot
         else: 
             raise SavingIssueException()
+        
+    def get_plot(self) -> dict:
+        return self.data.plot.to_dict()
 
     def clear(self):
         """_summary_

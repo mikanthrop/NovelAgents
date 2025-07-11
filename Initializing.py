@@ -3,8 +3,9 @@ import os
 from camel.models import ModelFactory, BaseModelBackend
 from camel.types import ModelPlatformType
 from camel.agents import ChatAgent, TaskPlannerAgent
-from camel.models.model_manager import ModelProcessingError
 from Exceptions import ModelNotFoundError
+from StoryGlossary import StoryGlossary
+from Drafting import set_planner_prompt, set_writer_prompt
 import Prompts
 
 
@@ -68,7 +69,7 @@ def initialize_chosen_model(model: str, key_or_path: str) -> BaseModelBackend:
         raise ModelNotFoundError("Unbekanntes Modell oder Plattform.")
             
 
-def initialize_agent_tasks(model: BaseModelBackend) -> dict[ChatAgent]:
+def initialize_brainstorming_agents(model:BaseModelBackend) -> dict[ChatAgent]:
     planner_agent = ChatAgent(
         system_message=Prompts.planner_prompt, 
         model=model
@@ -79,12 +80,20 @@ def initialize_agent_tasks(model: BaseModelBackend) -> dict[ChatAgent]:
         model=model,
     )
 
+    return {
+        "planner":planner_agent,
+        "critic":critic_agent
+    }
+
+
+def initialize_writing_agents(model:BaseModelBackend, story_glossary: StoryGlossary) -> dict[ChatAgent]:
     taskmaster_agent : TaskPlannerAgent = TaskPlannerAgent(
+        system_message=set_planner_prompt(story_glossary),
         model=model
     )
 
     writer_agent = ChatAgent(
-        system_message=Prompts.scene_writing_prompt,
+        system_message=set_writer_prompt(story_glossary),
         model=model,
         token_limit=None
     )
@@ -93,17 +102,9 @@ def initialize_agent_tasks(model: BaseModelBackend) -> dict[ChatAgent]:
         system_message=Prompts.feedback_prompt, 
         model=model
     )
-
-    rewrite_agent: ChatAgent = ChatAgent(
-        system_message=Prompts.rewrite_prompt,
-        model=model
-    )
     
     return {
-        "planner": planner_agent,
-        "critic": critic_agent,
         "taskmaster": taskmaster_agent,
         "writer": writer_agent,
         "feedback": feedback_agent,
-        "rewrite": rewrite_agent
     }

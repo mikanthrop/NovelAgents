@@ -5,25 +5,27 @@ from Drafting import run_planner, write_scenes
 import Initializing
 import Exceptions
 import Enums as E
-import random
+import Inputs
+from random import choice
 import json
 import os
 import traceback
+from datetime import datetime
 
 
 class StoryGeneratorGUI:
 
     @staticmethod
     def _random_genre_name() -> str: 
-        return random.choice(list(E.Genre)).value
+        return choice(list(E.Genre)).value
     
     @staticmethod
     def _random_audience_name() -> str: 
-        return random.choice(list(E.Audience)).value
+        return choice(list(E.Audience)).value
     
     @staticmethod
     def _random_theme_name() -> str:
-        return random.choice(list(E.Theme)).value
+        return choice(list(E.Theme)).value
     
 
     def __init__(self, root):
@@ -31,19 +33,22 @@ class StoryGeneratorGUI:
         self.root.title("Geschichten-Schreib-Algorithmus")
 
         # Human Input
+        input = Inputs.inputs[1]
         human_frame = ttk.LabelFrame(root, text="Geistiger Input")
         human_frame.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
-        self.genre = self._add_entry_with_reroll(human_frame, "Genre", self._random_genre_name(), self._random_genre_name)
-        self.audience = self._add_entry_with_reroll(human_frame, "Zielgruppe", self._random_audience_name(), self._random_audience_name)
-        self.theme = self._add_entry_with_reroll(human_frame, "Thema", self._random_theme_name(), self._random_theme_name)
+        self.genre = self._add_entry_with_reroll(human_frame, "Genre", input["genre"], self._random_genre_name)
+        self.audience = self._add_entry_with_reroll(human_frame, "Zielgruppe", input["audience"], self._random_audience_name)
+        self.theme = self._add_entry_with_reroll(human_frame, "Thema", input["theme"], self._random_theme_name)
 
         # Loop-Einstellungen
         default_revisions_nr = 2
         loop_frame = ttk.LabelFrame(root, text="Loop-Einstellungen")
         loop_frame.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
-        self.character_number = self._add_spinbox(loop_frame, "Anzahl der Charakter", random.randint(1,5))
+        # self.character_number = self._add_spinbox(loop_frame, "Anzahl der Charakter", random.randint(1,5))
+        self.character_number = self._add_spinbox(loop_frame, "Anzahl der Charakter", 2)
         self.revision_number = self._add_spinbox(loop_frame, "Anzahl der Überarbeitungen", default_revisions_nr)
-        self.scene_number = self._add_spinbox(loop_frame, "Anzahl der Szenen", random.randint(12, 24))
+        # self.scene_number = self._add_spinbox(loop_frame, "Anzahl der Szenen", random.randint(12, 24))
+        self.scene_number = self._add_spinbox(loop_frame, "Anzahl der Szenen", 15)
 
         # Modellwahl
         model_frame = ttk.LabelFrame(root, text="KI-Modellwahl")
@@ -108,7 +113,6 @@ class StoryGeneratorGUI:
 
     def _on_model_select(self, event=None):
         model = self.model_var.get()
-        print(model)
         if model == E.Model.CHATGPT4OMINI.value:
             self.dynamic_field_label.config(text="OpenAI API Key:")
         else:
@@ -139,6 +143,7 @@ class StoryGeneratorGUI:
 
     # Integrating the algorithm into the GUI
     def _start_generation(self):
+        start = datetime.now()
         self._update_status("Starte Generierung ...")
         human_input = {
             "genre": self.genre.get(),
@@ -156,20 +161,21 @@ class StoryGeneratorGUI:
         try: 
             self._update_status("Starte Initialisierung ...")
             agent = Initializing.initialize_chosen_model(model, key_or_path)
-            agents: dict = Initializing.initialize_agent_tasks(agent)
             self._update_status("Initialisierung erfolgreich abgeschlossen.")
             
             self._update_status("Starte Brainstorming ...")
-            brainstorming_glossary = brainstormStory(agents["planner"], agents["critic"], human_input["genre"], human_input["audience"], human_input["theme"], loops["character_number"], loops["revision_number"])
+            brainstorm_agents: dict = Initializing.initialize_brainstorming_agents(agent)
+            brainstorming_glossary = brainstormStory(brainstorm_agents["planner"], brainstorm_agents["critic"], human_input["genre"], human_input["audience"], human_input["theme"], loops["character_number"], loops["revision_number"])
             self._update_status("Brainstorming erfolgreich abgeschlossen.")
             
             self._update_status("Starte den Schreibprozess ...")
             self._update_status("Szenen werden geplant ...")
-            scene_prompts: list[str] = run_planner(agents["taskmaster"], brainstorming_glossary, loops["scene_number"])
+            write_agents: dict = Initializing.initialize_writing_agents(agent, brainstorming_glossary)
+            scene_prompts: list[str] = run_planner(write_agents["taskmaster"], brainstorming_glossary, loops["scene_number"])
             self._update_status("Szenen wurden erfolgreich geplant.")
             
             self._update_status("Szenen werden geschrieben und überarbeitet ...")
-            story_text: dict = write_scenes(agents["writer"], agents["feedback"], agents["rewrite"], scene_prompts)
+            story_text: dict = write_scenes(write_agents["writer"], write_agents["feedback"], scene_prompts)
             self._update_status("Schreibprozess erfolgreich abgeschlossen.")
             
             self._update_status("Dateien werden zur Verfügung gestellt ...")
@@ -181,7 +187,10 @@ class StoryGeneratorGUI:
             self._show_download_buttons()
             self._update_status("Prozess abgeschlossen.")
             self.download_frame.grid()  #show download frame
-            messagebox.showinfo("Fertig", "Die Dokumente wurden generiert.")
+            
+            end = datetime.now()
+
+            messagebox.showinfo("Fertig", f"Die Dokumente wurden generiert.\nDas hat {((end - start)/60).total_seconds():.2f} Minuten gedauert.\nDanke für's Warten!")
             
         except RuntimeError as error:
             self._update_status("Es ist etwas schief gelaufen ...")

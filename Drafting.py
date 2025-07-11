@@ -47,6 +47,18 @@ def restart_model(model):
         print(f"[ERROR] Failed to restart model: {e}")
 
 
+def set_writer_prompt(story_glossary: StoryGlossary) -> TextPrompt: 
+    setting = StoryGlossary.get_setting(story_glossary) or "Make something up that fits the characters and the plot."
+    characters = StoryGlossary.get_characters(story_glossary) or "Make up characters that fit the setting and plot."
+    plot = StoryGlossary.get_plot(story_glossary) or "Make up a plot that fits both the setting and the characters."
+
+    return Prompts.scene_writing_prompt.format(
+        characters=characters,
+        setting=setting,
+        plot=plot
+    )
+
+
 ## approach of loading the json memory file into the task planner prompt: 
 def set_planner_prompt(story_glossary: StoryGlossary, scene_number: int) -> TextPrompt: 
     """_summary_
@@ -57,20 +69,17 @@ def set_planner_prompt(story_glossary: StoryGlossary, scene_number: int) -> Text
     Returns:
         TextPrompt: _description_
     """    
-    story_data: dict = story_glossary.to_dict()
   
-    setting = story_data.get("setting", "Make something up that fits the characters and the plot.")
-    characters_data = story_data.get("characters", [])
-    characters =  "\n\n".join(json.dumps(c, indent=2) for c in characters_data) or "Make up characters that fit the setting and plot."
-    plot = story_data.get("plot", "Make up a plot that fits both the setting and the characters.")
+    setting = StoryGlossary.get_setting(story_glossary) or "Make something up that fits the characters and the plot."
+    characters = StoryGlossary.get_characters(story_glossary) or "Make up characters that fit the setting and plot."
+    plot = StoryGlossary.get_plot(story_glossary) or "Make up a plot that fits both the setting and the characters."
 
-    formatted_task_planner_prompt: TextPrompt = Prompts.scene_planning_prompt.format(
+    return Prompts.scene_planning_prompt.format(
         setting=setting, 
         characters=characters,
         plot=plot,
         scene_number=scene_number
     )
-    return formatted_task_planner_prompt
     
 
 def save_scene_prompts_to_txt(scene_prompts: list[str]) -> str: 
@@ -101,7 +110,7 @@ def run_planner(task_master: TaskPlannerAgent, story_glossary: StoryGlossary, sc
     return scene_prompts
 
 
-def write_scenes(writer: ChatAgent, critic: ChatAgent, rewriter: ChatAgent, scene_prompts: list[str]) -> dict:
+def write_scenes(writer: ChatAgent, critic: ChatAgent, scene_prompts: list[str]) -> dict:
     """_summary_
 
     Args:
@@ -127,7 +136,7 @@ def write_scenes(writer: ChatAgent, critic: ChatAgent, rewriter: ChatAgent, scen
         writing[f"Chapter{i+1}"] = writer_msg.msg.content
         print(f"\nChapter {loop_nr}: \n{writer_msg.msg.content}")
         
-        Rewriting.rewrite(rewriter, critic, writing[f"Chapter{i+1}"])
+        Rewriting.rewrite(writer, critic, writing[f"Chapter{i+1}"])
 
         loop_nr += 1
         
