@@ -37,7 +37,7 @@ def initialize_chosen_model(model: str, key_or_path: str) -> BaseModelBackend:
     
        
         # for OLLAMA platform       
-        elif model == [Model.MISTRAL.value, Model.LLAMA32.value, Model.QWEN25.value]: 
+        elif model in [Model.MISTRAL.value, Model.LLAMA32.value, Model.QWEN25.value]: 
             if not key_or_path.strip():
                 raise ValueError("OLLAMA Pfad fehlt.")
             os.environ["OLLAMA_PATH"] = key_or_path
@@ -65,6 +65,7 @@ def initialize_chosen_model(model: str, key_or_path: str) -> BaseModelBackend:
                     model_config_dict={"temperature": 0.6},
                 )
                 return agent
+        raise ModelNotFoundError("Unbekanntes Modell oder Plattform.")
             
 
 def initialize_agent_tasks(model: BaseModelBackend) -> dict[ChatAgent]:
