@@ -86,9 +86,8 @@ def initialize_brainstorming_agents(model:BaseModelBackend) -> dict[ChatAgent]:
     }
 
 
-def initialize_writing_agents(model:BaseModelBackend, story_glossary: StoryGlossary) -> dict[ChatAgent]:
+def initialize_writing_agents(model:BaseModelBackend, story_glossary: StoryGlossary, scene_nr: int) -> dict[ChatAgent]:
     taskmaster_agent : TaskPlannerAgent = TaskPlannerAgent(
-        system_message=set_planner_prompt(story_glossary),
         model=model
     )
 

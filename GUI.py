@@ -170,7 +170,7 @@ class StoryGeneratorGUI:
             
             self._update_status("Starte den Schreibprozess ...")
             self._update_status("Szenen werden geplant ...")
-            write_agents: dict = Initializing.initialize_writing_agents(agent, brainstorming_glossary)
+            write_agents: dict = Initializing.initialize_writing_agents(agent, brainstorming_glossary, loops["scene_number"])
             scene_prompts: list[str] = run_planner(write_agents["taskmaster"], brainstorming_glossary, loops["scene_number"])
             self._update_status("Szenen wurden erfolgreich geplant.")
             

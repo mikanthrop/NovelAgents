@@ -137,7 +137,7 @@ class StoryGlossary(BaseKeyValueStorage):
             print(f"Invalid setting format: {setting}")
 
     def get_setting(self) -> dict:
-        return self.data.setting.to_dict()
+        return self.data.setting
 
     def set_plot(self, plot: dict):
         """Set the plot in the story glossary json file. Always overwrites. 
@@ -155,7 +155,7 @@ class StoryGlossary(BaseKeyValueStorage):
             raise SavingIssueException()
         
     def get_plot(self) -> dict:
-        return self.data.plot.to_dict()
+        return self.data.plot
 
     def clear(self):
         """_summary_

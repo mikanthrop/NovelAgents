@@ -123,23 +123,38 @@ def write_scenes(writer: ChatAgent, critic: ChatAgent, scene_prompts: list[str])
         dict: _description_
     """
     writing: dict = {}
-    loop_nr: int = 1
 
     for i, prompt in enumerate(scene_prompts):
         
         try:
             writer_msg = writer.step(prompt)
+
+            # Handle multiple messages
+            if isinstance(writer_msg, list):
+                print(f"Warning: Multiple messages returned for scene {i+1}. Selecting the first one.")
+                selected_msg = writer_msg[0]  # Or implement logic to choose a more suitable one
+                writer.record_message(selected_msg)
+            else:
+                selected_msg = writer_msg
+
+            content = getattr(selected_msg.msg, 'content', None)
+
+            if content is None:
+                print(f"Warning: No content generated for scene {i+1}. Skipping...")
+                continue  # Skip or retry based on your preference
+
+            chapter_key = f"Chapter{i+1}"
+            writing[chapter_key] = content
+            print(f"\n{chapter_key}: \n{content}")
+
+            Rewriting.rewrite(writer, critic, content)
+
         except ModelProcessingError as e:
             print(f"Error in scene {i+1}: {e}. Restarting model...")
             restart_model(writer)
 
-        # TODO check if writer_msg.msg.content == None and act accordingly
-        writing[f"Chapter{i+1}"] = writer_msg.msg.content
-        print(f"\nChapter {loop_nr}: \n{writer_msg.msg.content}")
-        
-        Rewriting.rewrite(writer, critic, writing[f"Chapter{i+1}"])
-
-        loop_nr += 1
+        except AttributeError as e:
+            print(f"AttributeError in scene {i+1}: {e}. Possibly missing message content.")
         
     return writing
 
