@@ -38,7 +38,7 @@ def initialize_chosen_model(model: str, key_or_path: str) -> BaseModelBackend:
     
        
         # for OLLAMA platform       
-        elif model in [Model.MISTRAL.value, Model.LLAMA32.value, Model.QWEN25.value]: 
+        elif model in [m.value for m in Model]: 
             if not key_or_path.strip():
                 raise ValueError("OLLAMA Pfad fehlt.")
             os.environ["OLLAMA_PATH"] = key_or_path
@@ -66,18 +66,29 @@ def initialize_chosen_model(model: str, key_or_path: str) -> BaseModelBackend:
                     model_config_dict={"temperature": 0.6},
                 )
                 return agent
+            
+            elif model == Model.OLMO2.value:
+                agent = ModelFactory.create(
+                    model_platform=ModelPlatformType.OLLAMA,
+                    model_type="olmo2",
+                    model_config_dict={"temperature": 0.9},
+                )
+                return agent
+            
         raise ModelNotFoundError("Unbekanntes Modell oder Plattform.")
             
 
 def initialize_brainstorming_agents(model:BaseModelBackend) -> dict[ChatAgent]:
     planner_agent = ChatAgent(
         system_message=Prompts.planner_prompt, 
-        model=model
+        model=model, 
+        output_language="german"
     )   
 
     critic_agent = ChatAgent(
         system_message=Prompts.critic_prompt, 
         model=model,
+        output_language="german"
     )
 
     return {
@@ -88,18 +99,21 @@ def initialize_brainstorming_agents(model:BaseModelBackend) -> dict[ChatAgent]:
 
 def initialize_writing_agents(model:BaseModelBackend, story_glossary: StoryGlossary, scene_nr: int) -> dict[ChatAgent]:
     taskmaster_agent : TaskPlannerAgent = TaskPlannerAgent(
-        model=model
+        model=model,
+        output_language="german"
     )
 
     writer_agent = ChatAgent(
         system_message=set_writer_prompt(story_glossary),
         model=model,
-        token_limit=None
+        token_limit=None,
+        output_language="german"
     )
 
     feedback_agent: ChatAgent = ChatAgent(
         system_message=Prompts.feedback_prompt, 
-        model=model
+        model=model,
+        output_language="german"
     )
     
     return {

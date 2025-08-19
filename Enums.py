@@ -5,6 +5,7 @@ class Model(Enum):
     MISTRAL = "mistral"
     LLAMA32 = "llama3.2:3b"
     QWEN25 = "qwen2.5:14b"
+    OLMO2 = "olmo2"
 
 class Genre(Enum):
     SCIENCEFICTION = "Science Fiction"
