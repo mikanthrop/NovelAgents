@@ -72,9 +72,14 @@ class StoryGeneratorGUI:
         self.status_text.pack(fill="both", expand=True)
 
         # Start Button
-        self.start_button = ttk.Button(root, text="Start", command=self._start_generation)
-        self.start_button.grid(row=4, column=0, padx=10, pady=10)
+        button_frame = ttk.Frame(root)
+        button_frame.grid(row=4, column=0, columnspan=2, pady=10)
 
+        self.start_button_w_brainstorming = ttk.Button(button_frame, text="Start mit Brainstorming", command=self._start_generation)
+        self.start_button_w_brainstorming.grid(row=0, column=0, padx=(10, 5))
+
+        self.start_button_wo_brainstorming = ttk.Button(button_frame, text="Start ohne Brainstorming", command=self._start_generation_without_brainstorming)
+        self.start_button_wo_brainstorming.grid(row=0, column=1, padx=(5, 10))
         # Download Buttons
         self.download_frame = ttk.LabelFrame(root, text="Ergebnisse herunterladen")
         self.download_frame.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
@@ -167,6 +172,74 @@ class StoryGeneratorGUI:
             brainstorm_agents: dict = Initializing.initialize_brainstorming_agents(agent)
             brainstorming_glossary = brainstorm_story(brainstorm_agents["planner"], brainstorm_agents["critic"], human_input["genre"], human_input["audience"], human_input["theme"], loops["character_number"], loops["revision_number"])
             self._update_status("Brainstorming erfolgreich abgeschlossen.")
+            
+            self._update_status("Starte den Schreibprozess ...")
+            self._update_status("Szenen werden geplant ...")
+            write_agents: dict = Initializing.initialize_writing_agents(agent, brainstorming_glossary, loops["scene_number"])
+            scene_prompts: list[str] = run_planner(write_agents["taskmaster"], brainstorming_glossary, loops["scene_number"])
+            self._update_status("Szenen wurden erfolgreich geplant.")
+            
+            self._update_status("Szenen werden geschrieben und überarbeitet ...")
+            story_text: dict = write_scenes(write_agents["writer"], write_agents["feedback"], scene_prompts)
+            self._update_status("Schreibprozess erfolgreich abgeschlossen.")
+            
+            self._update_status("Dateien werden zur Verfügung gestellt ...")
+            self.generated_files = {
+                "Brainstorming JSON": ("json", brainstorming_glossary),
+                "Szenen Prompts": ("txt", scene_prompts), 
+                "Fertige Geschichte": ("txt", story_text)
+            }
+            self._show_download_buttons()
+            self._update_status("Prozess abgeschlossen.")
+            self.download_frame.grid()  #show download frame
+            
+            end = datetime.now()
+
+            messagebox.showinfo("Fertig", f"Die Dokumente wurden generiert.\nDas hat {((end - start)/60).total_seconds():.2f} Minuten gedauert.\nDanke für's Warten!")
+            
+        except RuntimeError as error:
+            self._update_status("Es ist etwas schief gelaufen ...")
+            messagebox.showerror("Whoops", f"{str(error)}\n\nDa scheinst du was falsch eingegeben zu haben. Überprüfe deine Eingaben besser nochmal")
+            return
+        except Exceptions.ModelProcessingError as error:
+            self._update_status("Es ist etwas schief gelaufen ...")
+            messagebox.showerror("Whoops", f"{str(error)}\n\nDa scheint was schiefgegangen zu sein. Überprüfe deine Eingaben nocheinmal.")
+        except UnicodeEncodeError as error: 
+            self._update_status("Es ist etwas schief gelaufen ...")
+            messagebox.showerror("Whoops", f"Da ist wohl was mit deinem Eingegebenem nicht ganz korrekt. Überprüf das besser nochmal.")
+        except Exception as error:
+            tb = traceback.format_exc()
+            self._update_status("Es ist etwas schief gelaufen ...")
+            messagebox.showerror("Whoops", f"Da ist wohl ein Fehler aufgetreten, mit dem wir nicht gerechnet haben:\n{str(error)}\n\n{tb}")
+            return
+        
+
+    def _start_generation_without_brainstorming(self):
+        start = datetime.now()
+        self._update_status("Starte Generierung ...")
+        human_input = {
+            "genre": self.genre.get(),
+            "audience": self.audience.get(),
+            "theme": self.theme.get(),
+        }
+        loops = {
+            "character_number": int(self.character_number.get()),
+            "revision_number": int(self.revision_number.get()),
+            "scene_number": int(self.scene_number.get()),
+        }
+        model = self.model_var.get()
+        key_or_path = self.dynamic_field.get()
+
+        try: 
+            self._update_status("Starte Initialisierung ...")
+            agent = Initializing.initialize_chosen_model(model, key_or_path)
+            self._update_status("Initialisierung erfolgreich abgeschlossen.")
+            
+            brainstorming_glossary = StoryGlossary()
+            brainstorming_glossary.set_audience(human_input["audience"])
+            brainstorming_glossary.set_genre(human_input["genre"])
+            brainstorming_glossary.set_theme(human_input["theme"])
+            print(brainstorming_glossary.to_dict())
             
             self._update_status("Starte den Schreibprozess ...")
             self._update_status("Szenen werden geplant ...")
