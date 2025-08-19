@@ -21,6 +21,7 @@ def split_scenes(all_scenes: str) -> list[str]:
         list[str]: _description_
     """    
     scene_prompts = all_scenes.strip().split("New Scene")
+    scene_prompts = all_scenes.strip().split("Neue Szene")
     if scene_prompts[0].strip() == '':
         scene_prompts.pop(0)
     return scene_prompts
@@ -128,20 +129,22 @@ def write_scenes(writer: ChatAgent, critic: ChatAgent, scene_prompts: list[str])
         
         try:
             writer_msg = writer.step(prompt)
+            print(f"\n------\nScene Prompt: \n{prompt}\n")
 
             # Handle multiple messages
             if isinstance(writer_msg, list):
                 print(f"Warning: Multiple messages returned for scene {i+1}. Selecting the first one.")
-                selected_msg = writer_msg[0]  # Or implement logic to choose a more suitable one
+                selected_msg = writer_msg[0]  
                 writer.record_message(selected_msg)
             else:
                 selected_msg = writer_msg
 
             content = getattr(selected_msg.msg, 'content', None)
+            print(f"\n------\nWriter Draft: \n{content}")
 
             if content is None:
                 print(f"Warning: No content generated for scene {i+1}. Skipping...")
-                continue  # Skip or retry based on your preference
+                continue  
 
             chapter_key = f"Chapter{i+1}"
             writing[chapter_key] = content

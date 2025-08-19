@@ -1,7 +1,6 @@
 from camel.agents import ChatAgent
 from camel.responses import ChatAgentResponse
 from StoryGlossary import StoryGlossary
-from camel.memories import AgentMemory, MemoryRecord
 from camel.models.model_manager import ModelProcessingError
 from typing import Dict
 
@@ -12,7 +11,7 @@ from Drafting import restart_model
 
 
 ## Setting up the cycle in which the planner and critic build a character
-def makeCharacter(planner: ChatAgent, critic: ChatAgent, 
+def make_character(planner: ChatAgent, critic: ChatAgent, 
                   initial_message: str, round_limit: int = 2) -> dict:
     """
     Cycle in which planner and critic agent design one character.
@@ -51,7 +50,7 @@ def makeCharacter(planner: ChatAgent, critic: ChatAgent,
 
 
 ## Writing down overall plot structure in json
-def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> dict: 
+def make_plot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> dict: 
     """
     Cycle in which planner and critic agent specify a plot. 
 
@@ -106,7 +105,7 @@ def makePlot(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_
 
 
 ## Thinking up the overall setting in json, then honing in on one specific part
-def makeSetting(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> dict: 
+def make_setting(planner: ChatAgent, critic: ChatAgent, initial_message: str, round_limit: int = 2) -> dict: 
     """
     Cycle in which planner and critic agent brainstorm setting and choose a specific part to further develop.
 
@@ -146,7 +145,7 @@ def makeTitle(planner: ChatAgent) -> str:
 
 ## Brainstorms the important facts for a story and adds them to a json
 #  glossary that functions as memory storage
-def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience: str, theme: str, character_count: int, revision_number: int) -> dict: 
+def brainstorm_story(planner: ChatAgent, critic: ChatAgent, genre: str, audience: str, theme: str, character_count: int, revision_number: int) -> dict: 
     """_summary_
 
     Args:
@@ -172,7 +171,7 @@ def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience:
         else: 
             character_prompt = f"Brainstorm a character that surrounds the character of {main_character['name']} in this {genre} story aimed at {audience} with a theme of {theme}. It's best if you flesh out a character that already ties into the main character but hasn't been worked on already. Think about what characters the story already has and what kind of character it still needs to make a compelling story."
         print(f"{character_prompt}\n")
-        character: format.Character = makeCharacter(planner, critic, character_prompt, revision_number)
+        character: format.Character = make_character(planner, critic, character_prompt, revision_number)
         if _ == 0: 
             main_character = character
         story_glossary.add_character(character)
@@ -181,14 +180,14 @@ def brainstormStory(planner: ChatAgent, critic: ChatAgent, genre: str, audience:
     # creates setting of story
     setting_prompt = f"Create an innovative but engaging setting for a {genre} story aimed at {audience} with a theme of {theme}."
     print(f"{setting_prompt}\n")
-    setting : format.Setting = makeSetting(planner, critic, setting_prompt, revision_number)
+    setting : format.Setting = make_setting(planner, critic, setting_prompt, revision_number)
     story_glossary.set_setting(setting)
     print(f"Finished brainstorming setting.\n")
 
     # creates plot of story
     plot_prompt = f"Write an innovative but engaging plot for a {genre} story aimed at {audience} with a theme of {theme}."
     print(f"{plot_prompt}\n")
-    plot : format.Plot = makePlot(planner, critic, plot_prompt, revision_number)
+    plot : format.Plot = make_plot(planner, critic, plot_prompt, revision_number)
     story_glossary.set_plot(plot)
     print(f"Finished brainstorming plot.\n")
 

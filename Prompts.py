@@ -37,7 +37,7 @@ planner_prompt_original: str = "You are a professional story planner and I am yo
 planner_prompt : BaseMessage = BaseMessage(
     role_name="story planner",
     role_type=RoleType.ASSISTANT,
-    meta_dict=None, #dict["sacred_flaw": "important"],
+    meta_dict=None, 
     content=planner_prompt_structured
 )
 
@@ -63,8 +63,7 @@ brainstorming_critic_prompt: str = "You are a picky editor, and I am a story pla
 "3. Spot and eliminate clichés. 4. Ensure that every piece of information I provide is " \
 "meaningfully and sensibly incorporated, especially when writing the plot. You must not " \
 "use the JSON format in your responses. We will work on one aspect at a time. Do not ask " \
-"for elaboration on other aspects (e.g., do not ask " \
-"about plot or character when we are currently refining the setting). You are responsible " \
+"for elaboration on other aspects. You are responsible " \
 "for ensuring that: 1. All the information I provide is used in a consistent and sensible " \
 "way as we progress through story development. 2. Nothing that I provide is ignored or used " \
 "in an illogical way in later stages (especially in the plot). You should ask me to clarify " \
@@ -86,7 +85,8 @@ scene_planning_prompt: TextPrompt = TextPrompt(f"You are a novel organizer worki
 "to make up short scene tasks. You should seperate each new scene with the tag 'New Scene'. You should give information " \
 "in a structured way. Give structured information on: - where the scene takes place, - which characters are part of the scene and what " \
 "their intentions are, - what conflict the scene has given the characters intentions, - what the outcome of the scene is, - what audience the story has. " \
-"Write {scene_number} scenes. Try to split them evenly between the five acts."
+"Write {scene_number} scenes. Try to split them evenly between the five acts. Start the first scene with a proper introduction. " \
+"Write the scenes towards a definitive end in scene {scene_number}."
 )
 
 scene_writing_prompt: TextPrompt = TextPrompt(f"You are a professional novel writer working together with a professional organizer and a professional text critique. " \
@@ -96,11 +96,11 @@ scene_writing_prompt: TextPrompt = TextPrompt(f"You are a professional novel wri
 "Write in language that is acceptable for the stories target audience. Make sure what you write is cohesive. When you get a text as an input and feedback concerning this text, then " \
 "your job is to revise the chapter you have been given. When you rewrite a chapter your goal should be to make it better than the previous version. You should write " \
 "in the past tense and take the feedback into consideration as you rewrite a chapter. Your rewrite has to be one continuous text. Use straightforward writing in your text. "\
-"As the writer, you should know who the character are, where the setting takes place and what the plot is. These are the characters: {characters}. This is " \
-" the setting: {setting}. And this is the plot: {plot}."
+"As the writer, you should know who the characters are, where the setting takes place and what the plot is. These are the characters: {characters}. This is " \
+"the setting: {setting}. And this is the plot: {plot}."
 )
 
 feedback_prompt: TextPrompt = TextPrompt(f"You are a professional novel chapter critic working together with me, a professional text rewriter. Your " \
 "task is to give me pointers on what I should take into consideration when I rewrite the given chapter. Make sure the chapter is interesting to the " \
-"reader, everything is well understandable and the chapter fits into possible earlier chapters. Take into consideration the emotional impact of the " \
-"writing and how clichéd the writing is.")
+"reader, everything is well understandable and the chapter fits into possible earlier chapters. Be critical in your assessments and feedback. Take into consideration the emotional impact of the " \
+"writing and how clichéd it is. Check if the chapter you are currently feedbacking is a double, so if you have feedbacked it before. If so say so.")

@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from Brainstorming import brainstormStory, StoryGlossary
+from Brainstorming import brainstorm_story, StoryGlossary
 from Drafting import run_planner, write_scenes
 import Initializing
 import Exceptions
@@ -33,7 +33,7 @@ class StoryGeneratorGUI:
         self.root.title("Geschichten-Schreib-Algorithmus")
 
         # Human Input
-        input = Inputs.inputs[1]
+        input = choice(Inputs.inputs)
         human_frame = ttk.LabelFrame(root, text="Geistiger Input")
         human_frame.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
         self.genre = self._add_entry_with_reroll(human_frame, "Genre", input["genre"], self._random_genre_name)
@@ -56,7 +56,7 @@ class StoryGeneratorGUI:
 
         self.model_var = tk.StringVar()
         self.model_menu = ttk.Combobox(model_frame, textvariable=self.model_var, state="readonly")
-        self.model_menu['values'] = [E.Model.CHATGPT4OMINI.value, E.Model.LLAMA32.value, E.Model.MISTRAL.value, E.Model.QWEN25.value]
+        self.model_menu['values'] = [m.value for m in E.Model]
         self.model_menu.bind("<<ComboboxSelected>>", self._on_model_select)
         self.model_menu.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 

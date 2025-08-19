@@ -82,7 +82,7 @@ rewrite_agent: ChatAgent = ChatAgent(
 start = datetime.now()
 
 ## BRAINSTORMING
-memory_file = Brainstorming.brainstormStory(planner, critic, "science fiction thriller", "adults, aged 25 and up", "murder on a space station", 2)
+memory_file = Brainstorming.brainstorm_story(planner, critic, "science fiction thriller", "adults, aged 25 and up", "murder on a space station", 2)
 
 ## WRITING
 
