@@ -4,9 +4,9 @@ from camel.agents import ChatAgent, TaskPlannerAgent
 from datetime import datetime
 
 import Prompts
-import Brainstorming
-import Drafting
-import Rewriting
+from brainstorming import brainstorm_story
+from drafting import run_planner, write_scenes
+from rewriting import save_story_to_txt
 import os
 
 open_api_key = os.environ["OPENAI_API_KEY"]
@@ -82,16 +82,14 @@ rewrite_agent: ChatAgent = ChatAgent(
 start = datetime.now()
 
 ## BRAINSTORMING
-memory_file = Brainstorming.brainstorm_story(planner, critic, "science fiction thriller", "adults, aged 25 and up", "murder on a space station", 2)
+memory_file = brainstorm_story(planner, critic, "science fiction thriller", "adults, aged 25 and up", "murder on a space station", 2)
 
 ## WRITING
 
-scene_prompts: list[str] = Drafting.run_planner(taskmaster1, memory_file)
+scene_prompts: list[str] = run_planner(taskmaster1, memory_file)
 
-written_scenes: dict = Drafting.write_scenes(writer, feedback_agent, rewrite_agent, scene_prompts)
-Rewriting.save_to_txt(written_scenes)
-
-## FEEDBACKING
+written_scenes: dict = write_scenes(writer, feedback_agent, rewrite_agent, scene_prompts)
+save_story_to_txt(written_scenes)
 
 
 end = datetime.now()

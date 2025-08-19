@@ -5,7 +5,7 @@ from camel.types import ModelPlatformType
 from camel.agents import ChatAgent, TaskPlannerAgent
 from Exceptions import ModelNotFoundError
 from StoryGlossary import StoryGlossary
-from Drafting import set_planner_prompt, set_writer_prompt
+from drafting import set_planner_prompt, set_writer_prompt
 import Prompts
 
 

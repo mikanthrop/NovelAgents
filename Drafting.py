@@ -4,7 +4,7 @@ from camel.prompts import TextPrompt
 from camel.models.model_manager import ModelProcessingError
 from StoryGlossary import StoryGlossary
 import Prompts
-import Rewriting
+from rewriting import rewrite
 import json
 import time
 import subprocess
@@ -150,7 +150,7 @@ def write_scenes(writer: ChatAgent, critic: ChatAgent, scene_prompts: list[str])
             writing[chapter_key] = content
             print(f"\n{chapter_key}: \n{content}")
 
-            Rewriting.rewrite(writer, critic, content)
+            rewrite(writer, critic, content)
 
         except ModelProcessingError as e:
             print(f"Error in scene {i+1}: {e}. Restarting model...")

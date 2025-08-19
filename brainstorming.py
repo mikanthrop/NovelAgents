@@ -7,7 +7,7 @@ from typing import Dict
 import ResponseFormats as format
 import json
 import StringParseUtility as util
-from Drafting import restart_model
+from drafting import restart_model
 
 
 ## Setting up the cycle in which the planner and critic build a character

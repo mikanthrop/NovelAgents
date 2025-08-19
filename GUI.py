@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from Brainstorming import brainstorm_story, StoryGlossary
-from Drafting import run_planner, write_scenes
+from brainstorming import brainstorm_story, StoryGlossary
+from drafting import run_planner, write_scenes
 import Initializing
 import Exceptions
 import Enums as E
@@ -165,7 +165,7 @@ class StoryGeneratorGUI:
             
             self._update_status("Starte Brainstorming ...")
             brainstorm_agents: dict = Initializing.initialize_brainstorming_agents(agent)
-            brainstorming_glossary = brainstormStory(brainstorm_agents["planner"], brainstorm_agents["critic"], human_input["genre"], human_input["audience"], human_input["theme"], loops["character_number"], loops["revision_number"])
+            brainstorming_glossary = brainstorm_story(brainstorm_agents["planner"], brainstorm_agents["critic"], human_input["genre"], human_input["audience"], human_input["theme"], loops["character_number"], loops["revision_number"])
             self._update_status("Brainstorming erfolgreich abgeschlossen.")
             
             self._update_status("Starte den Schreibprozess ...")
