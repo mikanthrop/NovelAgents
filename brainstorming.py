@@ -1,8 +1,6 @@
 from camel.agents import ChatAgent
 from camel.responses import ChatAgentResponse
 from StoryGlossary import StoryGlossary
-from camel.models.model_manager import ModelProcessingError
-from typing import Dict
 
 import ResponseFormats as format
 import json

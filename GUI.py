@@ -4,7 +4,6 @@ from tkinter import ttk, filedialog, messagebox
 from brainstorming import brainstorm_story, StoryGlossary
 from sceneprompting import run_planner
 from writing import write_scenes
-from utility import delete_agent_list
 from initializing import (
     initialize_brainstorming_agents,
     initialize_chosen_model,

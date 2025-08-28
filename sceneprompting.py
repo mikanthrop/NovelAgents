@@ -5,9 +5,6 @@ from StoryGlossary import StoryGlossary
 import Prompts
 
 
-from datetime import datetime
-
-
 def split_scenes(all_scenes: str) -> list[str]:
     """Splits a long text containing multiple scenes into a list of individual scene prompts.
 
