@@ -1,6 +1,16 @@
 from enum import Enum
 
 class Model(Enum):
+    """
+    Enum representing the supported AI models.
+
+    Supported models:
+        - ChatGPT-4o-mini
+        - Mistral
+        - LLaMA3.2 3b
+        - Qwen2.5 14b
+        - Olmo2 4b
+    """
     CHATGPT4OMINI = "gpt-4o-mini"
     MISTRAL = "mistral"
     LLAMA32 = "llama3.2:3b"
@@ -8,6 +18,11 @@ class Model(Enum):
     OLMO2 = "olmo2"
 
 class Genre(Enum):
+    """
+    Enum representing suggested story genres for GUI suggestions.
+
+    Each genre is intended to guide users when brainstorming or generating stories.
+    """
     SCIENCEFICTION = "Science Fiction"
     HIGHFANTASY = "High Fantasy"
     URBANFANTASY = "Urban Fantasy"
@@ -43,6 +58,9 @@ class Genre(Enum):
 
 
 class Audience(Enum):
+    """
+    List of suggested audiences. Is used in GUI suggestions. Inherits from Enum.
+    """
     CHILDREN = "Children (5-8)"
     MIDDLEGRADE = "Middle Grade (9-12)"
     YOUNGADULT = "Young Adult (13-18)"
@@ -53,18 +71,17 @@ class Audience(Enum):
     CASUALREADERS = "Casual Readers"
     GENERALAUDIENCE = "General Audience"
     LITERARYFICTIONREADERS = "Literary Fiction Readers"
-    ENJOYEXPERIMENTALSTORYTELLING = "Enjoy experimental Storytelling"
-    ENJOYNONLINEARSTORYTELLING = "Enjoy nonlinear Storytelling"
     ACADEMICS = "Academics"
-    SCHOLARSOFSPECULATIVEFICTION = "Scholars of Speculative Fiction"
-    RADIODRAMAFANS = "Radio Drama Fans"
-    INTERACTIVEFICTIONPLAYERS = "Interactive Fiction Players"
-    AUDIOBOOKLISTENERS = "Audiobook listeners"
 
 
     
 
 class Theme(Enum):
+    """
+    Enum representing suggested story audiences for GUI selection.
+
+    Each audience category helps guide story generation and suggestions.
+    """
     FORBIDDENINVENTION = "A forbidden invention that changes society"
     REDEMPTION = "Redemption through sacrifice"
     DECAYINGUTOPIA = "The decay of utopia"

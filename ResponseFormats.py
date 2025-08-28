@@ -1,19 +1,22 @@
 from pydantic import BaseModel
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Dict
 
 class Character(BaseModel):
-    """Character model. Inherits from BaseModel of the pydantic package. Has following attributes:\n
-    name: *str*\n
-    age: *int*\n
-    looks: *str*\n
-    sacred_flaw: *str*\n
-    temperament: *str*\n
-    backstory_events: *List[str]*\n
-    motivation: *str*\n
-    relationships: *List[str]*\n
-    skills: *List[str]*\n
-    misc_information: *Optional[dict]*
-    """    
+    """Character model. Inherits from Pydantic's BaseModel.
+
+    Attributes:
+        name (str): The character's name.
+        age (int): The character's age.
+        looks (str): A description of the character's appearance.
+        sacred_flaw (str): The character's defining weakness or flaw.
+        temperament (str): The character's general disposition or personality.
+        backstory_events (list[str]): Significant past events in the character's life.
+        motivation (str): The character's main drive or goal.
+        relationships (list[str]): Relationships the character maintains with others.
+        skills (list[str]): Skills or abilities the character possesses.
+        misc_information (Optional[dict[str, str]]): Additional information 
+            about the character, stored as key-value pairs.
+    """  
     name: str
     age: int
     looks: str
@@ -26,10 +29,13 @@ class Character(BaseModel):
     misc_information: Optional[Dict[str, str]]
 
     def to_dict(self):
-        """_summary_
+        """Converts the instance into a dictionary representation.
 
         Returns:
-            _type_: _description_
+            dict[str, object]: A dictionary containing the main attributes 
+            of the instance, including name, age, looks, sacred flaw, 
+            temperament, backstory events, motivation, relationships, 
+            skills, and misc information.
         """        
         return {
             "name": self.name,
@@ -45,14 +51,21 @@ class Character(BaseModel):
         }
 
 class Plot(BaseModel):
-    """_summary_
+    """Plot model. Inherits from Pydantic's BaseModel.
 
-    Args:
-        BaseModel (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """    
+    Attributes:
+        genre (str): The narrative genre of the plot (e.g., fantasy, sci-fi, mystery).
+        blurb (str): A short teaser text or summary for the plot.
+        overall_outline (str): The overall story outline from start to finish.
+        main_conflict (str): The central conflict driving the story.
+        act_one_outline (str): The outline of the first act.
+        act_two_outline (str): The outline of the second act.
+        act_three_outline (str): The outline of the third act.
+        act_four_outline (str): The outline of the fourth act.
+        act_five_outline (str): The outline of the fifth act.
+        misc_information (Optional[dict[str, str]]): Additional metadata or notes 
+            about the plot, stored as key-value pairs.
+    """     
     genre: str
     blurb: str
     overall_outline: str
@@ -65,15 +78,15 @@ class Plot(BaseModel):
     misc_information: Optional[Dict[str, str]]
 
     def to_dict(self):
-        """_summary_
+        """Converts the Plot instance into a dictionary representation.
 
         Returns:
-            _type_: _description_
+            dict[str, object]: A dictionary containing all plot attributes.
         """        
         return {
             "genre": self.genre,
             "blurb": self.blurb,
-            "outline": self.outline,
+            "outline": self.overall_outline,
             "main_conflict": self.main_conflict,
             "act_one_outline": self.act_one_outline,
             "act_two_outline": self.act_two_outline,
@@ -84,13 +97,22 @@ class Plot(BaseModel):
         }
 
 class Setting(BaseModel):
-    """_summary_
+    """Setting model. Inherits from Pydantic's BaseModel.
 
-    Args:
-        BaseModel (_type_): _description_
-
-    Returns:
-        _type_: _description_
+    Attributes:
+        time (str): The historical or fictional time period of the setting.
+        location (str): The primary location or world where the story takes place.
+        geography (str): Description of the geographical landscape.
+        ecology (Optional[str]): Information about flora, fauna, and ecosystems.
+        historical_events (Optional[list[str]]): Significant past events that shaped the setting.
+        cultural_customs (Optional[list[str]]): Traditions and rituals of the setting.
+        cultural_structures (Optional[list[str]]): Social or political structures and hierarchies.
+        social_dynamics (Optional[list[str]]): Interactions between groups, classes, or species.
+        infrastructure (Optional[list[str]]): Buildings, roads, and general societal infrastructure.
+        current_tension (Optional[list[str]]): Present-day conflicts or unresolved tensions.
+        magic_system (str | dict[str, str] | None): Description of magic, or detailed 
+            rules in a structured format.
+        misc_information (Optional[dict[str, str]]): Additional key-value metadata about the setting.
     """    
     time: str
     location: str
@@ -106,10 +128,10 @@ class Setting(BaseModel):
     misc_information: Optional[Dict[str, str]]
     
     def to_dict(self):
-        """_summary_
+        """Converts the Setting instance into a dictionary representation.
 
         Returns:
-            _type_: _description_
+            dict[str, object]: A dictionary containing all attributes of the setting.
         """        
         return {
             "time": self.time,
@@ -127,16 +149,25 @@ class Setting(BaseModel):
         }
 
 class StoryGlossary(BaseModel): 
-    """_summary_
+    """StoryGlossary model. Inherits from Pydantic's BaseModel.
 
-    Args:
-        BaseModel (_type_): _description_
-    """    
+    Represents the top-level container for a story concept, 
+    combining metadata with its core components.
+
+    Attributes:
+        title (str): The working title of the story.
+        theme (str): The central theme or underlying message of the story.
+        audience (str): The intended target audience (e.g., children, young adults, adults).
+        genre (str): The narrative genre (e.g., fantasy, sci-fi, mystery).
+        characters (list[Character]): A list of character objects that appear in the story.
+        setting (Setting | None): The story's setting, or None if not defined.
+        plot (Plot | None): The story's plot outline, or None if not defined.
+    """   
     title: str
     theme: str
     audience: str
     genre: str
-    characters: List[Character] 
+    characters: list[Character] 
     setting: Setting | None
     plot: Plot | None
 
