@@ -119,7 +119,7 @@ def make_setting(planner: ChatAgent, critic: ChatAgent, initial_message: str, ro
     if round_limit < 1: 
         return json.loads(setting_data)
 
-    clean_setting: dict = json.loads(cleaned_str) 
+    clean_setting: dict = json.loads(setting_data) 
     for _ in range(round_limit):
         critic_msg : ChatAgentResponse = critic.step(planner_msg.msg)
         print(f"-----Response of critic:-----\n{critic_msg.msg.content}\n")

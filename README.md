@@ -6,6 +6,7 @@
 Installationsguide NovelAgents
 
 1. Überprüfe, ob Python3.10.11 bereits auf deiner Maschine vorhanden ist. Wenn nicht, lade es von der Seite https://www.python.org/downloads/release/python-31011 herunter und installiere es
+	-> Version von Python kann mit python --version gecheckt werden
 2. Überprüfe, ob Ollama auf deiner Maschine bereits vorhanden ist. Wenn nicht, lade es von https://www.ollama.com herunterladen und installiere es 
     --> Pass auf mit Intel GPUs! Lade hierfür Ollama mithilfe dieser Anweisung herunter! https://www.intel.de/content/www/de/de/content-details/826081/running-ollama-with-open-webui-on-intel-hardware-platform.html
 	-> Über die command line kannst du mithilfe von ollama KI-Modelle lokal auf dem eigenen Rechner laufen lassen
@@ -14,7 +15,6 @@ Installationsguide NovelAgents
 3. Repository von Github herunterladen
 4. Im Novel Agents Repository mit python3.10.11 ein Virtual Environment aufsetzen 
 	-> Befehl auf Windows, wenn im Ordner: python3.10 -m venv
-		-> Version von Python kann mit python --version gecheckt werden
 		-> Bei Problemen, PC aus und wieder an machen, bzw PowerShell schließen und wieder öffnen
 		-> Wenn die Python Version noch immer nicht erkannt wird, kann mit >& "Path\to\your\python.exe" -m venv "Path\to\your\desired\locatioin\venv"< ein venv mit dem Namen venv aufgesetzt werden 
 5. Das Virtual Environment muss aktiviert werden
