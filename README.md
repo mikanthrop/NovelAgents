@@ -11,22 +11,18 @@ Installationsguide NovelAgents
 	-> über die command line können mithilfe von ollama ki-modelle lokal auf dem eigenenRrechner laufen
 	-> welche KI-modelle es gibt und mit welchen befehlen, du diese pullst, kannst du auf der Ollama Website herausfinden
 	-> der Algorithmus benutzt zu jeder zeit maximal zwei Agenten zeitgleich. dein Gerät sollte also zur Benutzung von OLLAMA Modellen genügend RAM haben, um zwei Modelle zeitgleich laufen lassen zu können. Das können verschiedene Modelle sein
-3. Node.js installieren (nodejs.org/en/download) oder überprüfen, ob es auf der Maschine verfügbar ist 
-	-> für die Dokumentation tippe ollama in die cmd
-4. Repository von Github herunterladen (hierfür kann GitHub desktop genutzt werden)
-5. in Novel Agents repository mit python3.10.11 ein virtualenvironment aufsetzen 
+3. Repository von Github herunterladen (hierfür kann GitHub desktop genutzt werden)
+4. in Novel Agents repository mit python3.10.11 ein virtualenvironment aufsetzen 
 	-> Befehl auf Windows, wenn im Ordner: python3.10 -m venv
 		-> Version von Python kann mit python --version gecheckt werden
 		-> Bei Problemen, PC aus und wieder an machen, bzw PowerShell schließen und wieder öffnen
 		-> wenn die python version noch immer nicht erkannt wird, kann mit >& "Path\to\your\python.exe" -m venv "Path\to\your\desired\locatioin\venv"< ein venv mit dem Namen venv aufgesetzt werden (um Namen zu ändern, ändere den letzten Teil des zweiten Paths
-6. das virtual environment aktivieren
+5. das virtual environment aktivieren
 	-> auf Windows mit "venv/Scripts/activate" (venv durch Namen des Virtual Environments austauschen)
-7. mit pip die requirements.txt auslesen und herunterladen
+6. mit pip die requirements.txt auslesen und herunterladen
 	-> auf Windows mit pip install -r requirements.txt
 		-> so wird alles notwendige in das virtual environment geladen
-8. installiere die packages aus der package.json
-	-> benutze npm install
-9. eine eigene .env Datei anlegen	
+7. eine eigene .env Datei anlegen	
 	-> sollte unter OLLAMA_PATH den Path zur Ollama exe enthalten
 	-> sollte unter OPENAI_API_KEY den zu verwendenden OpenAI API Key enthalten
 
