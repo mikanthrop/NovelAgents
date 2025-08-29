@@ -1,6 +1,7 @@
 # NovelAgents
  Dieses Repository beinhaltet den Code von NovelAgents, einem Multiagentensystem, das mit fünf Agenten in drei Phasen eine Geschichte von unterschiedlicher Länge generieren kann. 
  Dieses System ist gebaut mit ([Camel AI](https://github.com/camel-ai/camel)) von Li et al., [json_repair](https://github.com/mangiucugna/json_repair) von Stefano Baccianella und [Ollama](https://ollama.com/).
+ Starte das System, indem du die main.py startest. Viel Spaß beim Generieren! :)
 
 # Installation Guide
 Installationsguide NovelAgents
@@ -23,6 +24,7 @@ Installationsguide NovelAgents
 	-> Auf Windows mit >pip install -r requirements.txt<
 7. Zuletzt lege eine eigene .env Datei an
 	-> Sie sollte unter OLLAMA_PATH den Path zur Ollama exe enthalten
+		-> Ollama installiert unter C:\Users[DeinNutzer]\AppData\Local\Programs\Ollama
 	-> Sie sollte unter OPENAI_API_KEY den zu verwendenden OpenAI API Key enthalten
 
 ## Trouble-Shooting
